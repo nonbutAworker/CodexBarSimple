@@ -1,0 +1,11 @@
+.build/
+.swiftpm/
+.DS_Store
+CodexBarSimple.app/
+Distribution/*.dmg
+Distribution/*.zip
+Distribution/SHA256SUMS*.txt
+*.dSYM/
+design-qa.md
+design-qa*.png
+Validation/right-click-menu.png

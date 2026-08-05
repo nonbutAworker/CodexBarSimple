@@ -1,0 +1,26 @@
+CodexBarSimple 1.0.0（Apple Silicon）
+
+安装（推荐）：
+1. 打开“终端”。
+2. 粘贴下面这一条命令，然后按回车：
+
+   /bin/zsh "/Volumes/CodexBarSimple Installer/安装并启动.command"
+
+3. 脚本会安装到当前用户的 Applications 文件夹，注册用户级登录服务并立即启动。
+4. 确保本机已安装并登录 Codex CLI，或已安装并登录包含 Codex CLI 的 ChatGPT macOS 应用。
+5. 启动后，菜单栏会直接显示 Codex 剩余用量。
+
+首次打开：
+这是未经 Apple Developer ID 公证的社区发行包。安装命令会先校验应用完整性，只移除
+CodexBarSimple.app 的下载隔离标记，不会关闭或修改系统 Gatekeeper。不需要管理员密码。
+
+安装位置：~/Applications/CodexBarSimple.app
+登录服务：~/Library/LaunchAgents/app.codexbarsimple.CodexBarSimple.plist
+
+操作：
+- 左键点击无操作。
+- 右键点击可选择 Quit 退出。
+- 启动后立即读取，之后每 1 分钟自动刷新。
+- 低于 10% 时显示红色；额度回到 100% 时播放绿色放大恢复动画。
+
+系统要求：macOS 14 或更高版本，Apple Silicon。
