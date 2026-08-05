@@ -8,12 +8,12 @@ readonly checksum_name="SHA256SUMS.txt"
 readonly release_base="https://github.com/${repository}/releases/latest/download"
 
 if [[ "$(/usr/bin/uname -s)" != "Darwin" ]]; then
-    echo "CodexBarSimple 只支持 macOS。" >&2
+    echo "CodexBarSimple supports macOS only." >&2
     exit 1
 fi
 
 if [[ "$(/usr/bin/uname -m)" != "arm64" ]]; then
-    echo "CodexBarSimple 目前只支持 Apple Silicon Mac。" >&2
+    echo "CodexBarSimple currently supports Apple Silicon Macs only." >&2
     exit 1
 fi
 
@@ -30,7 +30,7 @@ archive_path="$temporary_directory/$archive_name"
 checksum_path="$temporary_directory/$checksum_name"
 extract_directory="$temporary_directory/extracted"
 
-echo "正在下载 CodexBarSimple…"
+echo "Downloading CodexBarSimple…"
 /usr/bin/curl --fail --location --silent --show-error \
     "$release_base/$archive_name" \
     --output "$archive_path"
@@ -44,20 +44,20 @@ expected_checksum="$(
 actual_checksum="$(/usr/bin/shasum -a 256 "$archive_path" | /usr/bin/awk '{ print $1 }')"
 
 if [[ -z "$expected_checksum" || "$actual_checksum" != "$expected_checksum" ]]; then
-    echo "安装包校验失败，请稍后重试。" >&2
+    echo "The downloaded package failed checksum verification. Please try again later." >&2
     exit 1
 fi
 
 /bin/mkdir -p "$extract_directory"
 /usr/bin/ditto -x -k "$archive_path" "$extract_directory"
 
-installer_path="$extract_directory/安装并启动.command"
+installer_path="$extract_directory/Install CodexBarSimple.command"
 if [[ ! -f "$installer_path" ]]; then
-    echo "安装包内容不完整。" >&2
+    echo "The downloaded package is incomplete." >&2
     exit 1
 fi
 
 /bin/chmod 755 "$installer_path"
 /bin/zsh "$installer_path"
 
-echo "CodexBarSimple 已安装并启动，可直接在菜单栏查看剩余额度。"
+echo "CodexBarSimple is installed and running. Your remaining usage is now visible in the menu bar."

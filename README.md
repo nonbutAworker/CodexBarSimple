@@ -1,59 +1,67 @@
 # CodexBarSimple
 
-一个专注于 Codex 剩余额度的极简 macOS 菜单栏工具。无需打开窗口，抬眼就能看到百分比。
+**English** | [简体中文](README.zh-CN.md)
+
+A tiny macOS menu bar utility that keeps your remaining Codex usage visible at a glance. No window to open,
+no dashboard to check—just the percentage in the menu bar.
 
 ![CodexBarSimple menu bar](Validation/persistent-menu-card.png)
 
-## 一键安装
+## One-command install
 
-要求：Apple Silicon Mac、macOS 14 或更高版本，以及已经安装并登录的 Codex CLI。
+Requirements: an Apple Silicon Mac running macOS 14 or later, with the Codex CLI installed and signed in.
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/zhzure/CodexBarSimple/main/install.sh)"
 ```
 
-安装脚本会：
+The installer:
 
-- 从最新 GitHub Release 下载 Apple Silicon 安装包并校验 SHA-256；
-- 把应用安装到 `~/Applications/CodexBarSimple.app`；
-- 仅移除该应用自身的下载隔离属性，不会关闭系统 Gatekeeper；
-- 注册用户级 LaunchAgent 并立即启动，不需要管理员权限。
+- downloads the Apple Silicon package from the latest GitHub Release and verifies its SHA-256 checksum;
+- installs the app to `~/Applications/CodexBarSimple.app`;
+- removes quarantine only from this app—it does not disable Gatekeeper system-wide;
+- registers a per-user LaunchAgent and starts the app immediately;
+- requires neither administrator privileges nor an Apple Developer account.
 
-本项目暂时没有 Apple Developer ID，因此应用没有 Apple 公证。不要直接双击 Release 中的 `.app`；使用上面的
-开源安装脚本即可。希望先检查脚本内容时，可以打开 [`install.sh`](install.sh) 阅读后再执行。
+CodexBarSimple does not currently have a Developer ID signature or Apple notarization. macOS may therefore refuse
+to launch a downloaded `.app` directly. Use the open-source installer above, or inspect [`install.sh`](install.sh)
+before running it. The checksum protects against a corrupted download; it is not a substitute for Developer ID
+publisher verification.
 
-也可以从 [Releases](https://github.com/zhzure/CodexBarSimple/releases/latest) 手动下载 DMG，挂载后在终端运行：
+For a manual installation, download the DMG from [Releases](https://github.com/zhzure/CodexBarSimple/releases/latest),
+mount it, and run this command in Terminal:
 
 ```bash
-/bin/zsh "/Volumes/CodexBarSimple Installer/安装并启动.command"
+/bin/zsh "/Volumes/CodexBarSimple Installer/Install CodexBarSimple.command"
 ```
 
-## 产品特性
+## Features
 
-- 菜单栏永久显示 Codex 剩余百分比、`Codex left` 和竖向用量线；
-- 启动后立即读取，随后每分钟自动刷新；
-- 剩余量低于 `10%` 时，数字和用量线同步变为错误红色；
-- 已观察到的额度从非 `100%` 回到 `100%` 时，数字短暂放大并变绿，提示额度已经重置；
-- 左键点击没有任何反应，右键菜单只有 `Quit`；
-- 没有 Dock 图标、设置窗口、账号管理或遥测。
+- Keeps the remaining Codex percentage, `Codex left` label, and a vertical usage bar permanently visible.
+- Refreshes immediately at launch and then once every minute.
+- Turns both the number and usage bar red below `10%` remaining.
+- When an observed quota jumps from below `100%` back to `100%`, briefly enlarges the number and turns it green.
+- Ignores left clicks; the right-click menu contains only `Quit`.
+- Has no Dock icon, settings window, account manager, analytics, or telemetry.
 
-额度重置动画峰值：
+Quota-reset animation at its peak:
 
 ![Quota reset animation peak](Validation/reset-animation-peak.png)
 
-## 工作原理与隐私
+## How it works and privacy
 
-CodexBarSimple 沿用 [CodexBar](https://github.com/steipete/CodexBar) 的只读 Codex CLI 数据链路：
+CodexBarSimple follows the read-only Codex CLI approach used by
+[CodexBar](https://github.com/steipete/CodexBar):
 
-1. 查找本机 Codex CLI；
-2. 启动 `codex -s read-only -a untrusted app-server`；
-3. 通过本地 JSON RPC 调用 `account/rateLimits/read`；
-4. 根据 `usedPercent` 计算并显示剩余百分比。
+1. Locate the Codex CLI installed on the Mac.
+2. Start `codex -s read-only -a untrusted app-server`.
+3. Call `account/rateLimits/read` over local JSON RPC.
+4. Calculate the remaining percentage from `usedPercent` and render it in an `NSStatusItem`.
 
-应用不会读取或修改 `~/.codex/auth.json`，不会访问 macOS 钥匙串，也不会把用量数据发送给第三方。
-Codex 的登录和令牌生命周期仍完全由官方 Codex CLI 管理。
+The app does not read or modify `~/.codex/auth.json`, access the macOS Keychain, or send usage data to a third
+party. Authentication and token management remain entirely under the Codex CLI.
 
-## 卸载
+## Uninstall
 
 ```bash
 launchctl bootout "gui/$(id -u)/app.codexbarsimple.CodexBarSimple" 2>/dev/null || true
@@ -61,9 +69,9 @@ rm -rf "$HOME/Applications/CodexBarSimple.app"
 rm -f "$HOME/Library/LaunchAgents/app.codexbarsimple.CodexBarSimple.plist"
 ```
 
-这些命令只会停止并删除当前用户的 CodexBarSimple 应用和登录服务。
+These commands stop and remove only CodexBarSimple and its per-user login service.
 
-## 从源码构建
+## Build from source
 
 ```bash
 git clone https://github.com/zhzure/CodexBarSimple.git
@@ -73,17 +81,19 @@ make package
 open CodexBarSimple.app
 ```
 
-开发要求：macOS 14+、Apple Silicon 和 Swift 6.2+。默认测试使用本地 Stub，不访问真实账号；只有显式设置
-`CODEXBAR_SIMPLE_LIVE_TESTS=1` 才会读取当前登录账号的真实用量。
+Development requirements: macOS 14+, Apple Silicon, and Swift 6.2+. The default test suite uses local stubs and
+does not access a real account. Set `CODEXBAR_SIMPLE_LIVE_TESTS=1` only when you explicitly want to test against
+the currently signed-in Codex account.
 
-## 致谢
+## Acknowledgements
 
-- [CodexBar](https://github.com/steipete/CodexBar)：核心实现思路和部分 MIT 许可代码；
-- [JetBrains Mono](https://www.jetbrains.com/lp/mono/)：菜单栏数字字体，使用 SIL Open Font License 1.1；
-- TRAE / Nimbus Core 设计素材：菜单栏卡片的颜色、排版、间距和圆角参考。
+- [CodexBar](https://github.com/steipete/CodexBar) for the core approach and selected MIT-licensed code.
+- [JetBrains Mono](https://www.jetbrains.com/lp/mono/) for the menu bar font, licensed under the SIL Open Font
+  License 1.1.
+- The supplied TRAE / Nimbus Core design references for the card's color, typography, spacing, and radius tokens.
 
-完整第三方声明见 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)。本项目是独立社区项目，与 OpenAI
-及 CodexBar 项目没有隶属或背书关系。
+See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) for complete notices. CodexBarSimple is an independent
+community project and is not affiliated with or endorsed by OpenAI or the CodexBar project.
 
 ## License
 

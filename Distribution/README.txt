@@ -1,0 +1,28 @@
+CodexBarSimple 1.0.0 (Apple Silicon)
+
+Recommended installation:
+1. Open Terminal.
+2. Paste the following command and press Return:
+
+   /bin/zsh "/Volumes/CodexBarSimple Installer/Install CodexBarSimple.command"
+
+3. The script installs the app to your user Applications folder, registers a per-user login service, and starts it.
+4. Make sure the Codex CLI is installed and signed in, or that the ChatGPT macOS app containing the CLI is signed in.
+5. Your remaining Codex usage will appear directly in the menu bar.
+
+Important:
+This community build does not have a Developer ID signature or Apple notarization. The installation command checks
+the app bundle, removes quarantine only from CodexBarSimple.app, and does not disable or modify Gatekeeper globally.
+Administrator privileges are not required.
+
+Install location: ~/Applications/CodexBarSimple.app
+Login service: ~/Library/LaunchAgents/app.codexbarsimple.CodexBarSimple.plist
+
+Controls:
+- Left click does nothing.
+- Right click opens a menu containing only Quit.
+- Usage refreshes at launch and once every minute.
+- Below 10%, the number and usage bar turn red.
+- When the quota returns to 100%, the number briefly grows and turns green.
+
+System requirements: macOS 14 or later on Apple Silicon.
