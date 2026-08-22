@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-readonly repository="zhzure/CodexBarSimple"
+readonly repository="nonbutAworker/CodexBarSimple"
 readonly archive_name="CodexBarSimple-macOS-arm64.zip"
 readonly checksum_name="SHA256SUMS.txt"
 readonly release_base="https://github.com/${repository}/releases/latest/download"

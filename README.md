@@ -12,7 +12,7 @@ no dashboard to check—just the percentage in the menu bar.
 Requirements: an Apple Silicon Mac running macOS 14 or later, with the Codex CLI installed and signed in.
 
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/zhzure/CodexBarSimple/main/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/nonbutAworker/CodexBarSimple/main/install.sh)"
 ```
 
 The installer:
@@ -28,7 +28,7 @@ to launch a downloaded `.app` directly. Use the open-source installer above, or 
 before running it. The checksum protects against a corrupted download; it is not a substitute for Developer ID
 publisher verification.
 
-For a manual installation, download the DMG from [Releases](https://github.com/zhzure/CodexBarSimple/releases/latest),
+For a manual installation, download the DMG from [Releases](https://github.com/nonbutAworker/CodexBarSimple/releases/latest),
 mount it, and run this command in Terminal:
 
 ```bash
@@ -74,7 +74,7 @@ These commands stop and remove only CodexBarSimple and its per-user login servic
 ## Build from source
 
 ```bash
-git clone https://github.com/zhzure/CodexBarSimple.git
+git clone https://github.com/nonbutAworker/CodexBarSimple.git
 cd CodexBarSimple
 make check
 make package

@@ -11,7 +11,7 @@
 要求：Apple Silicon Mac、macOS 14 或更高版本，以及已经安装并登录的 Codex CLI。
 
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/zhzure/CodexBarSimple/main/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/nonbutAworker/CodexBarSimple/main/install.sh)"
 ```
 
 安装脚本会：
@@ -26,7 +26,7 @@
 开源安装脚本，也可以先阅读 [`install.sh`](install.sh) 再执行。SHA-256 可以发现下载损坏，但不能代替
 Developer ID 的发布者身份验证。
 
-也可以从 [Releases](https://github.com/zhzure/CodexBarSimple/releases/latest) 手动下载 DMG，挂载后在终端运行：
+也可以从 [Releases](https://github.com/nonbutAworker/CodexBarSimple/releases/latest) 手动下载 DMG，挂载后在终端运行：
 
 ```bash
 /bin/zsh "/Volumes/CodexBarSimple Installer/安装并启动.command"
@@ -70,7 +70,7 @@ rm -f "$HOME/Library/LaunchAgents/app.codexbarsimple.CodexBarSimple.plist"
 ## 从源码构建
 
 ```bash
-git clone https://github.com/zhzure/CodexBarSimple.git
+git clone https://github.com/nonbutAworker/CodexBarSimple.git
 cd CodexBarSimple
 make check
 make package
