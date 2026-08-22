@@ -40,7 +40,7 @@ final class CodexRPCClient: @unchecked Sendable {
             "-s",
             "read-only",
             "-a",
-            "untrusted",
+            "never",
             "app-server",
         ]
         self.process.standardInput = self.stdinPipe
@@ -96,7 +96,7 @@ final class CodexRPCClient: @unchecked Sendable {
             params: [
                 "clientInfo": [
                     "name": "codexbarsimple",
-                    "version": "1.0.0",
+                    "version": "1.0.1",
                 ]
             ],
             timeout: self.initializeTimeout)

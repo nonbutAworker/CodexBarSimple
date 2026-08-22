@@ -49,7 +49,7 @@ struct UsageModelTests {
             await model.runRefreshLoop()
         }
 
-        for _ in 0..<40 {
+        for _ in 0..<100 {
             if (try? fixture.requestCount()) ?? 0 >= 2 {
                 break
             }

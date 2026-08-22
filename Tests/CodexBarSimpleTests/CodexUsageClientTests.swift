@@ -17,8 +17,10 @@ struct CodexUsageClientTests {
         }
 
         let stubURL = temporaryDirectory.appendingPathComponent("codex")
+        let argumentsURL = temporaryDirectory.appendingPathComponent("arguments")
         let script = """
             #!/bin/sh
+            printf '%s\\n' "$@" > "$HOME/arguments"
             while IFS= read -r line; do
               case "$line" in
                 *'"id":1'*)
@@ -50,5 +52,9 @@ struct CodexUsageClientTests {
 
         #expect(snapshot.preferredDisplay?.kind == .session)
         #expect(snapshot.preferredDisplay?.window.remainingPercent == 92)
+        #expect(
+            try String(contentsOf: argumentsURL, encoding: .utf8)
+                .split(whereSeparator: \.isNewline)
+                .map(String.init) == ["-s", "read-only", "-a", "never", "app-server"])
     }
 }
