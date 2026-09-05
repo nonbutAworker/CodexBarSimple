@@ -40,6 +40,20 @@ struct TraeMenuBarUsageRenderingTests {
             let resetImage = try #require(resetRenderer.nsImage)
             try Self.writePNG(resetImage, to: outputPath)
         }
+
+        if let outputPath = ProcessInfo.processInfo.environment["CODEXBAR_SIMPLE_LUNA_QA_SNAPSHOT_PATH"] {
+            let lunaRenderer = ImageRenderer(
+                content: TraeMenuBarUsage(
+                    value: "97%",
+                    remainingPercent: 97,
+                    isLunaReserve: true
+                )
+                .fixedSize())
+            lunaRenderer.scale = 2
+
+            let lunaImage = try #require(lunaRenderer.nsImage)
+            try Self.writePNG(lunaImage, to: outputPath)
+        }
     }
 
     @Test

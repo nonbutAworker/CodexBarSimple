@@ -1,4 +1,4 @@
-CodexBarSimple 1.0.1（Apple Silicon）
+CodexBarSimple 1.1.0（Apple Silicon）
 
 安装（推荐）：
 1. 打开“终端”。
@@ -21,6 +21,7 @@ CodexBarSimple.app 的下载隔离标记，不会关闭或修改系统 Gatekeepe
 - 左键点击无操作。
 - 右键点击可选择 Quit 退出。
 - 启动后立即读取，之后每 1 分钟自动刷新。
+- 正常 Codex 额度耗尽后显示月亮图标和金色 Luna Reserve 用量线。
 - 低于 10% 时显示红色；额度回到 100% 时播放绿色放大恢复动画。
 
 系统要求：macOS 14 或更高版本，Apple Silicon。

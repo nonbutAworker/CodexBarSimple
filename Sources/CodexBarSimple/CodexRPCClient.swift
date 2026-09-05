@@ -96,7 +96,7 @@ final class CodexRPCClient: @unchecked Sendable {
             params: [
                 "clientInfo": [
                     "name": "codexbarsimple",
-                    "version": "1.0.1",
+                    "version": "1.1.0",
                 ]
             ],
             timeout: self.initializeTimeout)

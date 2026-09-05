@@ -34,7 +34,7 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
         button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         button.imagePosition = .imageOnly
         button.imageScaling = .scaleNone
-        button.setAccessibilityLabel("Codex 剩余用量")
+        button.setAccessibilityLabel(self.model.accessibilityLabel)
         self.statusItem = statusItem
 
         self.updateStatusItem()
@@ -44,6 +44,7 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
         withObservationTracking {
             _ = self.model.displayText
             _ = self.model.remainingPercent
+            _ = self.model.displayKind
             _ = self.model.resetEventID
         } onChange: { [weak self] in
             Task { @MainActor in
@@ -71,12 +72,14 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
             content: TraeMenuBarUsage(
                 value: self.model.displayText,
                 remainingPercent: self.model.remainingPercent,
+                isLunaReserve: self.model.displayKind?.isLunaReserve == true,
                 resetEmphasis: self.resetEmphasis))
         renderer.scale = button.window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
 
         guard let image = renderer.nsImage else { return }
         image.isTemplate = false
         button.image = image
+        button.setAccessibilityLabel(self.model.accessibilityLabel)
         button.setAccessibilityValue(self.model.displayText)
     }
 

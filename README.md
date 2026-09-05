@@ -39,6 +39,7 @@ mount it, and run this command in Terminal:
 
 - Keeps the remaining Codex percentage, `Codex left` label, and a vertical usage bar permanently visible.
 - Refreshes immediately at launch and then once every minute.
+- When the normal Codex quota is exhausted, switches to Luna Reserve with a moon icon, gold percentage, and usage bar; normal quota remains the priority whenever it is above `0%`.
 - Turns both the number and usage bar red below `10%` remaining.
 - When an observed quota jumps from below `100%` back to `100%`, briefly enlarges the number and turns it green.
 - Ignores left clicks; the right-click menu contains only `Quit`.
@@ -54,9 +55,10 @@ CodexBarSimple follows the read-only Codex CLI approach used by
 [CodexBar](https://github.com/steipete/CodexBar):
 
 1. Locate the Codex CLI installed on the Mac.
-2. Start `codex -s read-only -a untrusted app-server`.
+2. Start `codex -s read-only -a never app-server`.
 3. Call `account/rateLimits/read` over local JSON RPC.
-4. Calculate the remaining percentage from `usedPercent` and render it in an `NSStatusItem`.
+4. Calculate the remaining percentage from `usedPercent`; when the normal window is exhausted, use the
+   `base_model_inference` Luna Reserve window and render it in an `NSStatusItem`.
 
 The app does not read or modify `~/.codex/auth.json`, access the macOS Keychain, or send usage data to a third
 party. Authentication and token management remain entirely under the Codex CLI.

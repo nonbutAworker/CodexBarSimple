@@ -36,6 +36,68 @@ struct CodexUsageParserTests {
     }
 
     @Test
+    func `uses Luna Reserve after the normal quota is exhausted`() throws {
+        let data = Data(
+            """
+            {
+              "rateLimits": {
+                "primary": {
+                  "usedPercent": 100,
+                  "windowDurationMins": 10080
+                }
+              },
+              "rateLimitsByLimitId": {
+                "base_model_inference": {
+                  "limitId": "base_model_inference",
+                  "limitName": "gpt-reserve",
+                  "primary": {
+                    "usedPercent": 2,
+                    "windowDurationMins": 10080,
+                    "resetsAt": 1789182314
+                  }
+                }
+              }
+            }
+            """.utf8)
+
+        let snapshot = try CodexUsageParser.decodeRPCResult(data)
+
+        #expect(snapshot.weekly?.remainingPercent == 0)
+        #expect(snapshot.lunaReserve?.usedPercent == 2)
+        #expect(snapshot.preferredDisplay?.kind == .lunaReserve)
+        #expect(snapshot.preferredDisplay?.window.remainingPercent == 98)
+    }
+
+    @Test
+    func `keeps the normal quota ahead of Luna Reserve`() throws {
+        let data = Data(
+            """
+            {
+              "rateLimits": {
+                "primary": {
+                  "usedPercent": 8,
+                  "windowDurationMins": 300
+                }
+              },
+              "rateLimitsByLimitId": {
+                "base_model_inference": {
+                  "limitName": "gpt-reserve",
+                  "primary": {
+                    "usedPercent": 2,
+                    "windowDurationMins": 10080
+                  }
+                }
+              }
+            }
+            """.utf8)
+
+        let snapshot = try CodexUsageParser.decodeRPCResult(data)
+
+        #expect(snapshot.preferredDisplay?.kind == .session)
+        #expect(snapshot.preferredDisplay?.window.remainingPercent == 92)
+    }
+
+    @Test
     func `normalizes swapped session and weekly windows`() throws {
         let data = Data(
             """

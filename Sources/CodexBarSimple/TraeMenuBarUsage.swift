@@ -3,36 +3,40 @@ import SwiftUI
 struct TraeMenuBarUsage: View {
     let value: String
     let remainingPercent: Double?
+    let isLunaReserve: Bool
     let resetEmphasis: CGFloat
 
     init(
         value: String,
         remainingPercent: Double?,
+        isLunaReserve: Bool = false,
         resetEmphasis: CGFloat = 0
     ) {
         self.value = value
         self.remainingPercent = remainingPercent
+        self.isLunaReserve = isLunaReserve
         self.resetEmphasis = resetEmphasis
     }
 
     var body: some View {
         HStack(spacing: 1.5) {
+            if self.isLunaReserve {
+                Image(systemName: "moon.fill")
+                    .font(.system(size: 7, weight: .semibold))
+                    .foregroundStyle(self.metricColor)
+                    .frame(width: 8)
+            }
+
             Text(self.value)
                 .font(TraeTheme.Typography.menuMetric(size: self.metricFontSize))
-                .foregroundStyle(
-                    self.isResetEmphasized
-                        ? TraeTheme.Palette.accentTeal
-                        : self.isLowRemaining
-                            ? TraeTheme.Palette.statusError
-                            : TraeTheme.Palette.textHover
-                )
+                .foregroundStyle(self.metricColor)
                 .monospacedDigit()
                 .lineLimit(1)
                 .fixedSize(horizontal: true, vertical: false)
 
             Spacer(minLength: 1)
 
-            Text("Codex left")
+            Text(self.isLunaReserve ? "Luna left" : "Codex left")
                 .font(TraeTheme.Typography.menuLabel)
                 .foregroundStyle(TraeTheme.Palette.text)
                 .lineLimit(1)
@@ -45,9 +49,7 @@ struct TraeMenuBarUsage: View {
 
                     Capsule()
                         .fill(
-                            self.isLowRemaining
-                                ? TraeTheme.Palette.statusError
-                                : TraeTheme.Palette.accentTeal
+                            self.progressColor
                         )
                         .frame(height: geometry.size.height * self.progress)
                 }
@@ -77,6 +79,31 @@ struct TraeMenuBarUsage: View {
 
     var isResetEmphasized: Bool {
         self.resetEmphasis > 0
+    }
+
+    private var metricColor: Color {
+        if self.isResetEmphasized {
+            return TraeTheme.Palette.accentTeal
+        }
+        if self.isLowRemaining {
+            return TraeTheme.Palette.statusError
+        }
+        if self.isLunaReserve {
+            return TraeTheme.Palette.reserveGold
+        }
+        return TraeTheme.Palette.textHover
+    }
+
+    private var progressColor: Color {
+        if self.isResetEmphasized {
+            return TraeTheme.Palette.accentTeal
+        }
+        if self.isLowRemaining {
+            return TraeTheme.Palette.statusError
+        }
+        return self.isLunaReserve
+            ? TraeTheme.Palette.reserveGold
+            : TraeTheme.Palette.accentTeal
     }
 
     var metricFontSize: CGFloat {

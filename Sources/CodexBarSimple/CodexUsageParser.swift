@@ -16,7 +16,8 @@ enum CodexUsageParser {
 
         let snapshot = CodexUsageSnapshot.normalized(
             primary: self.makeWindow(response.rateLimits.primary),
-            secondary: self.makeWindow(response.rateLimits.secondary))
+            secondary: self.makeWindow(response.rateLimits.secondary),
+            lunaReserve: self.makeLunaReserveWindow(response.rateLimitsByLimitID))
         guard snapshot.preferredDisplay != nil else {
             throw CodexUsageParserError.noRateLimits
         }
@@ -45,6 +46,24 @@ enum CodexUsageParser {
             resetsAt: window.resetsAt.map {
                 Date(timeIntervalSince1970: TimeInterval($0))
             })
+    }
+
+    private static func makeLunaReserveWindow(
+        _ rateLimitsByLimitID: [String: RPCRateLimitSnapshot]
+    ) -> CodexRateWindow? {
+        let reserveSnapshot =
+            rateLimitsByLimitID["base_model_inference"]
+            ?? rateLimitsByLimitID
+            .sorted { $0.key < $1.key }
+            .first { key, snapshot in
+                let searchableText = [key, snapshot.limitID, snapshot.limitName]
+                    .compactMap { $0?.lowercased() }
+                    .joined(separator: " ")
+                return searchableText.contains("reserve") || searchableText.contains("luna")
+            }?.value
+
+        guard let reserveSnapshot else { return nil }
+        return self.makeWindow(reserveSnapshot.primary ?? reserveSnapshot.secondary)
     }
 
     private static func makeWindow(_ window: BackendWindow?) -> CodexRateWindow? {
@@ -101,10 +120,13 @@ enum CodexUsageParser {
 
 private struct RPCRateLimitsResponse: Decodable {
     let rateLimits: RPCRateLimitSnapshot
+    let rateLimitsByLimitID: [String: RPCRateLimitSnapshot]
 
     private enum CodingKeys: String, CodingKey {
         case rateLimits
         case rateLimitsSnake = "rate_limits"
+        case rateLimitsByLimitID = "rateLimitsByLimitId"
+        case rateLimitsByLimitIDSnake = "rate_limits_by_limit_id"
     }
 
     init(from decoder: Decoder) throws {
@@ -114,20 +136,36 @@ private struct RPCRateLimitsResponse: Decodable {
         } else {
             self.rateLimits = try container.decode(RPCRateLimitSnapshot.self, forKey: .rateLimitsSnake)
         }
+        self.rateLimitsByLimitID =
+            (try? container.decode([String: RPCRateLimitSnapshot].self, forKey: .rateLimitsByLimitID))
+            ?? (try? container.decode([String: RPCRateLimitSnapshot].self, forKey: .rateLimitsByLimitIDSnake))
+            ?? [:]
     }
 }
 
 private struct RPCRateLimitSnapshot: Decodable {
+    let limitID: String?
+    let limitName: String?
     let primary: RPCWindow?
     let secondary: RPCWindow?
 
     private enum CodingKeys: String, CodingKey {
+        case limitID = "limitId"
+        case limitIDSnake = "limit_id"
+        case limitName
+        case limitNameSnake = "limit_name"
         case primary
         case secondary
     }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.limitID =
+            (try? container.decodeIfPresent(String.self, forKey: .limitID))
+            ?? (try? container.decodeIfPresent(String.self, forKey: .limitIDSnake))
+        self.limitName =
+            (try? container.decodeIfPresent(String.self, forKey: .limitName))
+            ?? (try? container.decodeIfPresent(String.self, forKey: .limitNameSnake))
         self.primary = Self.decodeWindow(container, forKey: .primary)
         self.secondary = Self.decodeWindow(container, forKey: .secondary)
     }

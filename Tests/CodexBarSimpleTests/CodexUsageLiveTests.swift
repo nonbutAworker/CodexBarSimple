@@ -23,6 +23,8 @@ struct CodexUsageLiveTests {
                 "session"
             case .weekly:
                 "weekly"
+            case .lunaReserve:
+                "luna-reserve"
             }
         print(
             "LIVE_CODEX_USAGE kind=\(kind) used=\(displayedUsage.window.usedPercent) "

@@ -107,6 +107,19 @@ struct UsageModelTests {
         #expect(model.resetEventID == 1)
         #expect(!UsageModel.detectedReset(from: nil, to: 100))
     }
+
+    @Test
+    func `shows Luna Reserve when the normal quota is exhausted`() async throws {
+        let fixture = try CodexScriptFixture(mode: .lunaReserve)
+        defer { fixture.remove() }
+
+        let model = UsageModel(client: fixture.client)
+        await model.refresh()
+
+        #expect(model.displayText == "98%")
+        #expect(model.remainingPercent == 98)
+        #expect(model.displayKind == .lunaReserve)
+    }
 }
 
 private struct CodexScriptFixture {
@@ -116,6 +129,7 @@ private struct CodexScriptFixture {
         case slowSuccess
         case successFailureRecovery
         case usageThenReset
+        case lunaReserve
     }
 
     let directory: URL
@@ -168,6 +182,10 @@ private struct CodexScriptFixture {
                       else
                         printf '%s\\n' '{"id":2,"result":{"rateLimits":{"primary":{"usedPercent":0,"windowDurationMins":300}}}}'
                       fi
+                """
+            case .lunaReserve:
+                """
+                      printf '%s\\n' '{"id":2,"result":{"rateLimits":{"primary":{"usedPercent":100,"windowDurationMins":10080}},"rateLimitsByLimitId":{"base_model_inference":{"limitName":"gpt-reserve","primary":{"usedPercent":2,"windowDurationMins":10080}}}}}'
                 """
             }
 

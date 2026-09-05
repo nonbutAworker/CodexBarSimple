@@ -7,6 +7,7 @@ enum TraeTheme {
         static let surface = Color(red: 0x22 / 255, green: 0x24 / 255, blue: 0x27 / 255)
         static let overlay3 = Color(red: 0xE0 / 255, green: 0xE2 / 255, blue: 0xF2 / 255, opacity: 0.08)
         static let accentTeal = Color(red: 0x2D / 255, green: 0xD2 / 255, blue: 0x88 / 255)
+        static let reserveGold = Color(red: 0xE1 / 255, green: 0xB0 / 255, blue: 0x00 / 255)
         static let statusError = Color(red: 0xF6 / 255, green: 0x5A / 255, blue: 0x5A / 255)
 
         static let text = Color(red: 0xD1 / 255, green: 0xD3 / 255, blue: 0xDB / 255)

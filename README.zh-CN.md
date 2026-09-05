@@ -36,6 +36,7 @@ Developer ID 的发布者身份验证。
 
 - 菜单栏永久显示 Codex 剩余百分比、`Codex left` 标签和竖向用量线；
 - 启动后立即读取，随后每分钟自动刷新；
+- 正常 Codex 额度耗尽后自动切换到 Luna Reserve，显示月亮图标、金色百分比和金色用量线；正常额度大于 `0%` 时始终优先显示正常额度；
 - 剩余量低于 `10%` 时，数字和用量线同步变为错误红色；
 - 已观察到的额度从非 `100%` 回到 `100%` 时，数字短暂放大并变绿；
 - 左键点击没有任何反应，右键菜单只有 `Quit`；
@@ -50,9 +51,10 @@ Developer ID 的发布者身份验证。
 CodexBarSimple 沿用 [CodexBar](https://github.com/steipete/CodexBar) 的只读 Codex CLI 数据链路：
 
 1. 查找本机 Codex CLI；
-2. 启动 `codex -s read-only -a untrusted app-server`；
+2. 启动 `codex -s read-only -a never app-server`；
 3. 通过本地 JSON RPC 调用 `account/rateLimits/read`；
-4. 根据 `usedPercent` 计算剩余百分比，并通过 `NSStatusItem` 渲染到菜单栏。
+4. 根据 `usedPercent` 计算剩余百分比；正常窗口耗尽时读取 `base_model_inference` 的 Luna Reserve 窗口，
+   并通过 `NSStatusItem` 渲染到菜单栏。
 
 应用不会读取或修改 `~/.codex/auth.json`，不会访问 macOS 钥匙串，也不会把用量数据发送给第三方。
 Codex 的登录和令牌生命周期仍完全由 Codex CLI 管理。

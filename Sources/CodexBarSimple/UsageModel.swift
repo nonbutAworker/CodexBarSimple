@@ -6,7 +6,12 @@ import Observation
 final class UsageModel {
     private(set) var displayText = "--%"
     private(set) var remainingPercent: Double?
+    private(set) var displayKind: CodexWindowKind?
     private(set) var resetEventID = 0
+
+    var accessibilityLabel: String {
+        self.displayKind?.isLunaReserve == true ? "Luna Reserve 剩余用量" : "Codex 剩余用量"
+    }
 
     @ObservationIgnored private let client: CodexUsageClient
     @ObservationIgnored private let refreshInterval: Duration
@@ -49,9 +54,12 @@ final class UsageModel {
             let text = PercentageFormatter.string(displayedUsage.window.remainingPercent)
             let didReset = Self.detectedReset(
                 from: self.remainingPercent,
-                to: displayedUsage.window.remainingPercent)
+                previousKind: self.displayKind,
+                to: displayedUsage.window.remainingPercent,
+                currentKind: displayedUsage.kind)
             self.displayText = text
             self.remainingPercent = displayedUsage.window.remainingPercent
+            self.displayKind = displayedUsage.kind
             if didReset {
                 self.resetEventID += 1
             }
@@ -66,5 +74,16 @@ final class UsageModel {
         guard let previous else { return false }
         return PercentageFormatter.string(previous) != "100%"
             && PercentageFormatter.string(current) == "100%"
+    }
+
+    static func detectedReset(
+        from previous: Double?,
+        previousKind: CodexWindowKind?,
+        to current: Double,
+        currentKind: CodexWindowKind
+    ) -> Bool {
+        guard !currentKind.isLunaReserve else { return false }
+        _ = previousKind
+        return Self.detectedReset(from: previous, to: current)
     }
 }

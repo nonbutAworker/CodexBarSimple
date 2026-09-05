@@ -1,4 +1,4 @@
-CodexBarSimple 1.0.1 (Apple Silicon)
+CodexBarSimple 1.1.0 (Apple Silicon)
 
 Recommended installation:
 1. Open Terminal.
@@ -22,6 +22,7 @@ Controls:
 - Left click does nothing.
 - Right click opens a menu containing only Quit.
 - Usage refreshes at launch and once every minute.
+- When the normal Codex quota is exhausted, Luna Reserve appears with a moon icon and gold usage bar.
 - Below 10%, the number and usage bar turn red.
 - When the quota returns to 100%, the number briefly grows and turns green.
 
