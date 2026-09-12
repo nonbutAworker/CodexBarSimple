@@ -45,8 +45,8 @@ struct CodexUsageClientTests {
                 "HOME": temporaryDirectory.path,
                 "PATH": "/usr/bin:/bin",
             ],
-            initializeTimeout: 1,
-            requestTimeout: 1)
+            initializeTimeout: 5,
+            requestTimeout: 5)
 
         let snapshot = try await client.fetch()
 

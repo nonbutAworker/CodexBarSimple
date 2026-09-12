@@ -36,6 +36,7 @@ struct ResetNoticeTests {
         await model.refresh()
 
         #expect(model.isResetScheduled == (scenario == "scheduled"))
+        #expect(model.scheduledResetID == (scenario == "scheduled" ? "reset-1" : nil))
     }
 
     @Test

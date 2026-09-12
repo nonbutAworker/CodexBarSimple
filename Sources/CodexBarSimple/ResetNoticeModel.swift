@@ -40,6 +40,10 @@ final class ResetNoticeModel {
     private(set) var bellEventID = 0
     @ObservationIgnored private var lastAnnouncedResetID: String?
 
+    var scheduledResetID: String? {
+        self.isResetScheduled ? self.lastAnnouncedResetID : nil
+    }
+
     init(
         session: URLSession = URLSession(configuration: .ephemeral),
         refreshInterval: Duration = .seconds(600)

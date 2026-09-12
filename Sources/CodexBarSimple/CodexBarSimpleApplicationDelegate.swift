@@ -1,9 +1,10 @@
 import AppKit
 import Observation
 import SwiftUI
+import UserNotifications
 
 @MainActor
-final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
+final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     private let model = UsageModel()
 
     private var statusItem: NSStatusItem?
@@ -16,9 +17,17 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
     private var bellAnimationTask: Task<Void, Never>?
     private var handledBellEventID = 0
     private var bellRotation: Double = 0
+    private let resetNotifications = ResetNotifications()
+    private var notificationAuthorizationTask: Task<Void, Never>?
+    private var resetNotificationTask: Task<Void, Never>?
+    private var notificationAnnouncementID: String?
 
     func applicationDidFinishLaunching(_: Notification) {
         self.installStatusItem()
+        UNUserNotificationCenter.current().delegate = self
+        self.notificationAuthorizationTask = Task {
+            _ = await self.resetNotifications.requestAuthorization()
+        }
         self.observeUsage()
         self.refreshTask = Task {
             await self.model.runRefreshLoop()
@@ -33,6 +42,8 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
         self.resetAnimationTask?.cancel()
         self.resetNoticeTask?.cancel()
         self.bellAnimationTask?.cancel()
+        self.notificationAuthorizationTask?.cancel()
+        self.resetNotificationTask?.cancel()
     }
 
     private func installStatusItem() {
@@ -68,6 +79,7 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func handleUsageChange() {
+        self.updateResetNotification()
         self.updateBellAnimation()
         guard self.model.resetEventID != self.handledResetEventID else {
             self.updateStatusItem()
@@ -172,6 +184,22 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    private func updateResetNotification() {
+        let id = self.resetNotice.scheduledResetID
+        if self.notificationAnnouncementID != id {
+            self.resetNotificationTask?.cancel()
+            self.resetNotificationTask = nil
+            self.notificationAnnouncementID = id
+        }
+        guard let id, self.resetNotificationTask == nil else { return }
+        self.resetNotificationTask = Task {
+            await self.resetNotifications.notify(announcementID: id)
+            if !Task.isCancelled {
+                self.resetNotificationTask = nil
+            }
+        }
+    }
+
     @objc
     private func handleStatusItemClick(_ sender: NSStatusBarButton) {
         guard
@@ -197,5 +225,13 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
     @objc
     private func quit() {
         NSApp.terminate(nil)
+    }
+
+    nonisolated func userNotificationCenter(
+        _: UNUserNotificationCenter,
+        willPresent _: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .list, .sound])
     }
 }
