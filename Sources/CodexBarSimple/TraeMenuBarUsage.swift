@@ -5,17 +5,20 @@ struct TraeMenuBarUsage: View {
     let remainingPercent: Double?
     let isLunaReserve: Bool
     let resetEmphasis: CGFloat
+    let isResetScheduled: Bool
 
     init(
         value: String,
         remainingPercent: Double?,
         isLunaReserve: Bool = false,
-        resetEmphasis: CGFloat = 0
+        resetEmphasis: CGFloat = 0,
+        isResetScheduled: Bool = false
     ) {
         self.value = value
         self.remainingPercent = remainingPercent
         self.isLunaReserve = isLunaReserve
         self.resetEmphasis = resetEmphasis
+        self.isResetScheduled = isResetScheduled
     }
 
     var body: some View {
@@ -62,7 +65,9 @@ struct TraeMenuBarUsage: View {
         .clipShape(RoundedRectangle(cornerRadius: TraeTheme.Radius.medium))
         .overlay {
             RoundedRectangle(cornerRadius: TraeTheme.Radius.medium)
-                .stroke(TraeTheme.Palette.border2, lineWidth: 0.5)
+                .strokeBorder(
+                    self.isResetScheduled ? TraeTheme.Palette.statusWarning : TraeTheme.Palette.border2,
+                    lineWidth: self.isResetScheduled ? 1.5 : 0.5)
         }
         .environment(\.colorScheme, .dark)
     }

@@ -39,6 +39,8 @@ mount it, and run this command in Terminal:
 
 - Keeps the remaining Codex percentage, `Codex left` label, and a vertical usage bar permanently visible.
 - Refreshes immediately at launch and then once every minute.
+- Checks [Codex Resets](https://codex-resets.com/api/docs) at launch and every 10 minutes. An orange border means
+  a regular quota reset has been explicitly announced and is awaiting execution: use your remaining quota soon.
 - When the normal Codex quota is exhausted, switches to Luna Reserve with a moon icon, gold percentage, and usage bar; normal quota remains the priority whenever it is above `0%`.
 - Turns both the number and usage bar red below `10%` remaining.
 - When an observed quota jumps from below `100%` back to `100%`, briefly enlarges the number and turns it green.
@@ -62,6 +64,14 @@ CodexBarSimple follows the read-only Codex CLI approach used by
 
 The app does not read or modify `~/.codex/auth.json`, access the macOS Keychain, or send usage data to a third
 party. Authentication and token management remain entirely under the Codex CLI.
+
+The reset reminder independently reads the public `https://codex-resets.com/api/v1/status` endpoint without
+cookies, account details, or usage data. It only uses `scheduled_reset` with `status: scheduled` and
+`reset_type: regular`; forecasts (`active_watch`), completed resets, and banked reset credits do not trigger it.
+The border remains orange even if an estimated execution time passes, until the feed clears the pending reset.
+If the feed cannot be verified, the border returns to normal until a later successful check. Each check bypasses
+the local HTTP cache so the service's longer cache lifetime cannot delay reminders. Codex Resets is a third-party
+announcement tracker, not an official OpenAI service.
 
 ## Uninstall
 

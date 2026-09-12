@@ -14,6 +14,7 @@ enum TraeTheme {
         static let textHover = Color(red: 0xF5 / 255, green: 0xF9 / 255, blue: 0xFE / 255)
 
         static let border2 = Color(red: 0xE0 / 255, green: 0xE2 / 255, blue: 0xF2 / 255, opacity: 0.16)
+        static let statusWarning = Color(red: 0xD2 / 255, green: 0x7E / 255, blue: 0x24 / 255)
     }
 
     enum Radius {

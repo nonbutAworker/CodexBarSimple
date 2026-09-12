@@ -11,6 +11,8 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
     private var resetAnimationTask: Task<Void, Never>?
     private var handledResetEventID = 0
     private var resetEmphasis: CGFloat = 0
+    private let resetNotice = ResetNoticeModel()
+    private var resetNoticeTask: Task<Void, Never>?
 
     func applicationDidFinishLaunching(_: Notification) {
         self.installStatusItem()
@@ -18,11 +20,15 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
         self.refreshTask = Task {
             await self.model.runRefreshLoop()
         }
+        self.resetNoticeTask = Task {
+            await self.resetNotice.runRefreshLoop()
+        }
     }
 
     func applicationWillTerminate(_: Notification) {
         self.refreshTask?.cancel()
         self.resetAnimationTask?.cancel()
+        self.resetNoticeTask?.cancel()
     }
 
     private func installStatusItem() {
@@ -46,6 +52,7 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
             _ = self.model.remainingPercent
             _ = self.model.displayKind
             _ = self.model.resetEventID
+            _ = self.resetNotice.isResetScheduled
         } onChange: { [weak self] in
             Task { @MainActor in
                 guard let self else { return }
@@ -73,7 +80,8 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
                 value: self.model.displayText,
                 remainingPercent: self.model.remainingPercent,
                 isLunaReserve: self.model.displayKind?.isLunaReserve == true,
-                resetEmphasis: self.resetEmphasis))
+                resetEmphasis: self.resetEmphasis,
+                isResetScheduled: self.resetNotice.isResetScheduled))
         renderer.scale = button.window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
 
         guard let image = renderer.nsImage else { return }
@@ -81,6 +89,10 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
         button.image = image
         button.setAccessibilityLabel(self.model.accessibilityLabel)
         button.setAccessibilityValue(self.model.displayText)
+        button.setAccessibilityHelp(
+            self.resetNotice.isResetScheduled
+                ? "A Codex quota reset is announced and awaiting execution. Orange border: use your remaining quota soon."
+                : nil)
     }
 
     private func startResetAnimation() {

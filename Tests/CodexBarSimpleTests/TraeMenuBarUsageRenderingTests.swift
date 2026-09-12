@@ -54,6 +54,21 @@ struct TraeMenuBarUsageRenderingTests {
             let lunaImage = try #require(lunaRenderer.nsImage)
             try Self.writePNG(lunaImage, to: outputPath)
         }
+
+        if let outputPath = ProcessInfo.processInfo.environment["CODEXBAR_SIMPLE_NOTICE_QA_SNAPSHOT_PATH"] {
+            let noticeRenderer = ImageRenderer(
+                content: VStack(spacing: 6) {
+                    TraeMenuBarUsage(value: "96%", remainingPercent: 96)
+                    TraeMenuBarUsage(value: "96%", remainingPercent: 96, isResetScheduled: true)
+                    TraeMenuBarUsage(value: "95%", remainingPercent: 95, isLunaReserve: true, isResetScheduled: true)
+                    TraeMenuBarUsage(value: "6%", remainingPercent: 6, isResetScheduled: true)
+                    TraeMenuBarUsage(value: "100%", remainingPercent: 100, resetEmphasis: 1, isResetScheduled: true)
+                }
+                .padding(8)
+                .fixedSize())
+            noticeRenderer.scale = 3
+            try Self.writePNG(try #require(noticeRenderer.nsImage), to: outputPath)
+        }
     }
 
     @Test

@@ -36,6 +36,8 @@ Developer ID 的发布者身份验证。
 
 - 菜单栏永久显示 Codex 剩余百分比、`Codex left` 标签和竖向用量线；
 - 启动后立即读取，随后每分钟自动刷新；
+- 启动时及每 10 分钟检查 [Codex Resets](https://codex-resets.com/api/docs)。已明确公告、等待执行的常规额度重置
+  会让卡片显示一圈橙色边框，提醒尽快使用当前剩余额度；
 - 正常 Codex 额度耗尽后自动切换到 Luna Reserve，显示月亮图标、金色百分比和金色用量线；正常额度大于 `0%` 时始终优先显示正常额度；
 - 剩余量低于 `10%` 时，数字和用量线同步变为错误红色；
 - 已观察到的额度从非 `100%` 回到 `100%` 时，数字短暂放大并变绿；
@@ -58,6 +60,13 @@ CodexBarSimple 沿用 [CodexBar](https://github.com/steipete/CodexBar) 的只读
 
 应用不会读取或修改 `~/.codex/auth.json`，不会访问 macOS 钥匙串，也不会把用量数据发送给第三方。
 Codex 的登录和令牌生命周期仍完全由 Codex CLI 管理。
+
+重置提醒独立读取公开接口 `https://codex-resets.com/api/v1/status`，不携带 Cookie、账号资料或用量数据。
+只在 `scheduled_reset` 的 `status` 为 `scheduled` 且 `reset_type` 为 `regular` 时显示橙框；概率预测
+（`active_watch`）、已完成的重置和发放 banked reset 券不会触发。预计执行时间已过不代表重置完成，
+橙框会保留到接口取消待执行状态。接口无法验证时恢复普通边框，下一次成功检查后重新判断。
+每次请求都会跳过本地 HTTP 缓存，避免接口较长的缓存时间延迟提醒。Codex Resets 是第三方公告追踪服务，
+并非 OpenAI 官方服务。
 
 ## 卸载
 
