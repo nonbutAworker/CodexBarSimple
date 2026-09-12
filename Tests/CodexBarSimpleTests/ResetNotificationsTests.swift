@@ -27,8 +27,42 @@ struct ResetNotificationsTests {
         #expect(request.identifier == "codex-reset-reset-1")
         #expect(request.trigger == nil)
         #expect(request.content.title == "Codex 额度即将重置")
-        #expect(request.content.body.contains("当前剩余额度"))
+        #expect(request.content.body == "已确认新的重置公告，记得尽快使用当前剩余额度。")
         #expect(request.content.sound != nil)
+    }
+
+    @Test(arguments: [
+        ("2026-09-12T16:30:00Z", "Asia/Shanghai", "2026年9月13日 00:30"),
+        ("2026-09-12T16:30:00Z", "America/Los_Angeles", "2026年9月12日 09:30"),
+        ("2026-12-31T16:30:00Z", "Asia/Shanghai", "2027年1月1日 00:30"),
+        ("2026-12-31T16:30:00Z", "America/Los_Angeles", "2026年12月31日 08:30"),
+    ])
+    func `shows the announced date and time in the local time zone`(
+        _ timestamp: String, _ timeZoneID: String, _ expectedTime: String
+    ) throws {
+        let date = try #require(ISO8601DateFormatter().date(from: timestamp))
+        let timeZone = try #require(TimeZone(identifier: timeZoneID))
+        let body = ResetNotifications.notificationBody(scheduledFor: date, timeZone: timeZone)
+
+        #expect(body == "预计重置时间：\(expectedTime)（本地时间）。记得尽快使用当前剩余额度。")
+        #expect(ResetNotifications.notificationBody(scheduledFor: nil) == "已确认新的重置公告，记得尽快使用当前剩余额度。")
+    }
+
+    @Test
+    func `native notification includes the scheduled time without repeating the announcement`() async throws {
+        let fixture = try NotificationPreferences()
+        defer { fixture.remove() }
+        var requests: [UNNotificationRequest] = []
+        let notifier = ResetNotifications(
+            defaults: fixture.defaults, authorize: { true }, deliver: { requests.append($0) })
+        let date = try #require(ISO8601DateFormatter().date(from: "2026-09-12T16:30:00Z"))
+
+        await notifier.notify(announcementID: "reset-1", scheduledFor: date)
+        await notifier.notify(announcementID: "reset-1", scheduledFor: date.addingTimeInterval(3600))
+
+        #expect(requests.count == 1)
+        let request = try #require(requests.first)
+        #expect(request.content.body == ResetNotifications.notificationBody(scheduledFor: date))
     }
 
     @Test

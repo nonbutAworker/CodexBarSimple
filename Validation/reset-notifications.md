@@ -30,3 +30,13 @@ The mocked Codex process test now has a 5-second deadline, matching other proces
 - The existing installation command updated the per-user app. Its LaunchAgent was verified running from the installed bundle after the update.
 - macOS displayed the native CodexBarSimple notification authorization prompt. After allowing notifications, the installed app logged `Notification permission granted: true` and continued running.
 - Native authorization was verified, but a real future announcement's end-to-end banner delivery was not simulated or claimed.
+
+## Scheduled times in notifications (1.4.1)
+
+- The documented `scheduled_reset.scheduled_for` timestamp is decoded separately from announcement publication time. See the [Codex Resets OpenAPI schema](https://codex-resets.com/api/openapi.json).
+- A valid timestamp adds the full Gregorian date and 24-hour time to the notification body, converted to the Mac's current time zone and labeled as local time. UTC and explicit offsets, with or without fractional seconds, are supported.
+- Missing, null, invalid, date-only, or timezone-free values keep the existing time-free notification text. They do not suppress an otherwise confirmed reset reminder.
+- The model clears the scheduled time when the announcement ends, a new announcement lacks a time, or the feed cannot be verified. The existing once-per-announcement notification rule is unchanged; later schedule edits do not send a second notification.
+- `make test` and `make check` passed all 34 tests in 8 suites. Focused reset tests passed all 15 tests in 2 suites. New coverage includes parsing, timestamp replacement/clearing, local formatting, midnight/year rollover, summer/winter offsets, and the actual submitted notification body using an injected delivery callback.
+- No synthetic reset notification was delivered to the real notification center for testing.
+- Release build 1.4.1 (build 7) passed app-signature verification, DMG verification, ZIP extraction, installer syntax checks, and archive checksum checks. The installed Apple Silicon app's LaunchAgent was verified running, and its native notification authorization remained granted after the update.

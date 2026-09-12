@@ -1,4 +1,4 @@
-CodexBarSimple 1.4.0 (Apple Silicon)
+CodexBarSimple 1.4.1 (Apple Silicon)
 
 Recommended installation:
 1. Open Terminal.
@@ -29,6 +29,7 @@ Controls:
   explicitly announced and awaiting execution. Forecasts and banked reset credits do not trigger the border.
 - Confirmed upcoming resets also send a native macOS notification, once per announcement even after restarting.
   If permission is denied, the menu bar still works. Notifications follow your macOS notification and Focus settings.
+  When available, the notification includes the scheduled reset date and time in your Mac's local time zone.
 - When the normal Codex quota is exhausted, Luna Reserve appears with a moon icon and gold usage bar.
 - Below 10%, the number and usage bar turn red.
 - When the quota returns to 100%, the number briefly grows and turns green.

@@ -54,7 +54,7 @@ final class ResetNotifications {
         return granted
     }
 
-    func notify(announcementID: String) async {
+    func notify(announcementID: String, scheduledFor: Date? = nil) async {
         guard
             !(self.defaults.stringArray(forKey: self.historyKey) ?? []).contains(announcementID),
             self.inFlightIDs.insert(announcementID).inserted
@@ -64,7 +64,7 @@ final class ResetNotifications {
         guard await self.requestAuthorization(), !Task.isCancelled else { return }
         let content = UNMutableNotificationContent()
         content.title = "Codex 额度即将重置"
-        content.body = "已确认新的重置公告，记得尽快使用当前剩余额度。"
+        content.body = Self.notificationBody(scheduledFor: scheduledFor)
         content.sound = .default
         content.threadIdentifier = "codex-reset-announcements"
         let request = UNNotificationRequest(identifier: "codex-reset-\(announcementID)", content: content, trigger: nil)
@@ -78,5 +78,15 @@ final class ResetNotifications {
             // Failed submissions must not suppress a later notification for this announcement.
             self.logger.error("Reset notification submission failed: \(error.localizedDescription, privacy: .public)")
         }
+    }
+
+    static func notificationBody(scheduledFor: Date?, timeZone: TimeZone = .current) -> String {
+        guard let scheduledFor else { return "已确认新的重置公告，记得尽快使用当前剩余额度。" }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = timeZone
+        formatter.dateFormat = "yyyy年M月d日 HH:mm"
+        return "预计重置时间：\(formatter.string(from: scheduledFor))（本地时间）。记得尽快使用当前剩余额度。"
     }
 }

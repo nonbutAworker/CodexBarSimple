@@ -21,11 +21,21 @@ struct CodexResetStatus: Decodable {
         let status: String
         let resetType: String
         let id: String
+        let scheduledFor: String?
 
         private enum CodingKeys: String, CodingKey {
             case status
             case resetType = "reset_type"
             case id
+            case scheduledFor = "scheduled_for"
+        }
+
+        var scheduledDate: Date? {
+            guard let scheduledFor = self.scheduledFor else { return nil }
+            let formatter = ISO8601DateFormatter()
+            if let date = formatter.date(from: scheduledFor) { return date }
+            formatter.formatOptions.insert(.withFractionalSeconds)
+            return formatter.date(from: scheduledFor)
         }
     }
 }
@@ -39,6 +49,7 @@ final class ResetNoticeModel {
     @ObservationIgnored private let refreshInterval: Duration
     private(set) var bellEventID = 0
     @ObservationIgnored private var lastAnnouncedResetID: String?
+    private(set) var scheduledResetDate: Date?
 
     var scheduledResetID: String? {
         self.isResetScheduled ? self.lastAnnouncedResetID : nil
@@ -76,6 +87,7 @@ final class ResetNoticeModel {
                 throw URLError(.badServerResponse)
             }
             let status = try JSONDecoder().decode(CodexResetStatus.self, from: data)
+            self.scheduledResetDate = status.isResetScheduled ? status.data.scheduledReset?.scheduledDate : nil
             self.isResetScheduled = status.isResetScheduled
             if status.isResetScheduled, let id = status.data.scheduledReset?.id,
                 id != self.lastAnnouncedResetID
@@ -86,6 +98,7 @@ final class ResetNoticeModel {
         } catch {
             // An unavailable feed cannot confirm that a reset is still pending.
             self.isResetScheduled = false
+            self.scheduledResetDate = nil
         }
     }
 }

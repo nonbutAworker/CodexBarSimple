@@ -27,6 +27,54 @@ struct ResetNoticeTests {
         #expect(status.isResetScheduled == expected)
     }
 
+    @Test(arguments: [
+        (#""2026-09-12T16:30:00Z""#, 0.0),
+        (#""2026-09-12T16:30:00.123Z""#, 0.123),
+        (#""2026-09-13T00:30:00+08:00""#, 0.0),
+        (#""2026-09-12T09:30:00-07:00""#, 0.0),
+        (#""2026-09-13T00:30:00.123+08:00""#, 0.123),
+        ("null", nil),
+        (#""not-a-date""#, nil),
+        (#""2026-09-12""#, nil),
+        (#""2026-09-12T16:30:00""#, nil),
+    ])
+    func `parses optional scheduled times without guessing a missing time or zone`(
+        _ value: String, _ fractionalSeconds: Double?
+    ) throws {
+        let data = Data(
+            """
+            {"data":{"scheduled_reset":{"id":"reset-1","status":"scheduled","reset_type":"regular",
+            "scheduled_for":\(value)}}}
+            """.utf8)
+        let status = try JSONDecoder().decode(CodexResetStatus.self, from: data)
+        #expect(status.isResetScheduled)
+        if let fractionalSeconds {
+            let date = try #require(status.data.scheduledReset?.scheduledDate)
+            let expected = try #require(
+                DateComponents(
+                    calendar: Calendar(identifier: .gregorian), timeZone: TimeZone(secondsFromGMT: 0),
+                    year: 2026, month: 9, day: 12, hour: 16, minute: 30
+                ).date)
+            #expect(abs(date.timeIntervalSince(expected) - fractionalSeconds) < 0.001)
+        } else {
+            #expect(status.data.scheduledReset?.scheduledDate == nil)
+        }
+    }
+
+    @Test
+    func `refresh replaces or clears the scheduled time with the current announcement`() async throws {
+        let session = Self.session(
+            scenario: "scheduled-time,scheduled-time-later,scheduled-new,scheduled-time,clear,scheduled-time,offline")
+        defer { session.invalidateAndCancel() }
+        let model = ResetNoticeModel(session: session)
+        let original = try #require(ISO8601DateFormatter().date(from: "2026-09-12T16:30:00Z"))
+
+        for expected in [original, original.addingTimeInterval(3600), nil, original, nil, original, nil] {
+            await model.refresh()
+            #expect(model.scheduledResetDate == expected)
+        }
+    }
+
     @Test(arguments: ["scheduled", "clear", "unavailable", "malformed", "offline"])
     func `checks the public feed without cached data or account credentials`(_ scenario: String) async {
         let session = Self.session(scenario: scenario)
@@ -37,6 +85,7 @@ struct ResetNoticeTests {
 
         #expect(model.isResetScheduled == (scenario == "scheduled"))
         #expect(model.scheduledResetID == (scenario == "scheduled" ? "reset-1" : nil))
+        #expect(model.scheduledResetDate == nil)
     }
 
     @Test
@@ -146,6 +195,12 @@ private final class ResetStatusURLProtocol: URLProtocol, @unchecked Sendable {
             body = "invalid JSON"
         case "scheduled-new":
             body = #"{"data":{"scheduled_reset":{"id":"reset-2","status":"scheduled","reset_type":"regular"}}}"#
+        case "scheduled-time", "scheduled-time-later":
+            let time = scenario == "scheduled-time" ? "2026-09-12T16:30:00Z" : "2026-09-12T17:30:00.000Z"
+            body = """
+                {"data":{"scheduled_reset":{"id":"reset-1","status":"scheduled","reset_type":"regular",
+                "scheduled_for":"\(time)"}}}
+                """
         default:
             body = #"{"data":{"scheduled_reset":{"id":"reset-1","status":"scheduled","reset_type":"regular"}}}"#
         }

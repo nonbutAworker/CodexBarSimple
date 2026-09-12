@@ -69,6 +69,7 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate, 
             _ = self.model.resetEventID
             _ = self.resetNotice.isResetScheduled
             _ = self.resetNotice.bellEventID
+            _ = self.resetNotice.scheduledResetDate
         } onChange: { [weak self] in
             Task { @MainActor in
                 guard let self else { return }
@@ -193,7 +194,7 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate, 
         }
         guard let id, self.resetNotificationTask == nil else { return }
         self.resetNotificationTask = Task {
-            await self.resetNotifications.notify(announcementID: id)
+            await self.resetNotifications.notify(announcementID: id, scheduledFor: self.resetNotice.scheduledResetDate)
             if !Task.isCancelled {
                 self.resetNotificationTask = nil
             }

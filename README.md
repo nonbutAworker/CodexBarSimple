@@ -45,6 +45,8 @@ mount it, and run this command in Terminal:
   then stays still until the announcement ends. Repeated checks of the same announcement do not restart it.
 - Sends a native macOS notification for a confirmed upcoming reset, once per announcement even across app
   restarts. Allow notifications when macOS asks; the menu bar continues working if permission is denied.
+  When the announcement supplies a valid scheduled time, the notification includes its full date and 24-hour
+  time in your Mac's local time zone. Missing or invalid times keep the existing time-free reminder.
 - When the normal Codex quota is exhausted, switches to Luna Reserve with a moon icon, gold percentage, and usage bar; normal quota remains the priority whenever it is above `0%`.
 - Turns both the number and usage bar red below `10%` remaining.
 - When an observed quota jumps from below `100%` back to `100%`, briefly enlarges the number and turns it green.
@@ -86,6 +88,10 @@ Only public announcement IDs are saved in the app's local preferences to prevent
 Notification banners and sounds follow your macOS notification and Focus settings. If you previously denied
 permission, enable **System Settings → Notifications → CodexBarSimple → Allow notifications** and restart the
 app to check the current announcement again.
+
+Notification times use the documented `scheduled_reset.scheduled_for` timestamp, not the announcement's
+publication time or a forecast. The time available when an announcement is first notified is shown; later
+schedule edits do not send duplicate notifications.
 
 ## Uninstall
 
