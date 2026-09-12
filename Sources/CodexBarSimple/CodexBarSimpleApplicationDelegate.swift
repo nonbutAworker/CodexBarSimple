@@ -13,6 +13,9 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
     private var resetEmphasis: CGFloat = 0
     private let resetNotice = ResetNoticeModel()
     private var resetNoticeTask: Task<Void, Never>?
+    private var bellAnimationTask: Task<Void, Never>?
+    private var handledBellEventID = 0
+    private var bellRotation: Double = 0
 
     func applicationDidFinishLaunching(_: Notification) {
         self.installStatusItem()
@@ -29,6 +32,7 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
         self.refreshTask?.cancel()
         self.resetAnimationTask?.cancel()
         self.resetNoticeTask?.cancel()
+        self.bellAnimationTask?.cancel()
     }
 
     private func installStatusItem() {
@@ -53,6 +57,7 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
             _ = self.model.displayKind
             _ = self.model.resetEventID
             _ = self.resetNotice.isResetScheduled
+            _ = self.resetNotice.bellEventID
         } onChange: { [weak self] in
             Task { @MainActor in
                 guard let self else { return }
@@ -63,6 +68,7 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func handleUsageChange() {
+        self.updateBellAnimation()
         guard self.model.resetEventID != self.handledResetEventID else {
             self.updateStatusItem()
             return
@@ -81,7 +87,8 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
                 remainingPercent: self.model.remainingPercent,
                 isLunaReserve: self.model.displayKind?.isLunaReserve == true,
                 resetEmphasis: self.resetEmphasis,
-                isResetScheduled: self.resetNotice.isResetScheduled))
+                isResetScheduled: self.resetNotice.isResetScheduled,
+                bellRotation: self.bellRotation))
         renderer.scale = button.window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
 
         guard let image = renderer.nsImage else { return }
@@ -126,6 +133,41 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate {
             }
 
             self.resetEmphasis = 0
+            self.updateStatusItem()
+        }
+    }
+
+    private func updateBellAnimation() {
+        guard self.resetNotice.isResetScheduled else {
+            self.bellAnimationTask?.cancel()
+            self.bellAnimationTask = nil
+            self.bellRotation = 0
+            return
+        }
+        guard self.resetNotice.bellEventID != self.handledBellEventID else { return }
+        self.handledBellEventID = self.resetNotice.bellEventID
+        self.bellAnimationTask?.cancel()
+        self.bellRotation = 0
+
+        self.bellAnimationTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            let clock = ContinuousClock()
+            let start = clock.now
+            let end = start.advanced(by: .seconds(ResetBellMotion.duration))
+            do {
+                while !Task.isCancelled, clock.now < end {
+                    let elapsed = start.duration(to: clock.now).components
+                    self.bellRotation = ResetBellMotion.rotation(
+                        at: Double(elapsed.seconds) + Double(elapsed.attoseconds) / 1e18)
+                    self.updateStatusItem()
+                    try await Task.sleep(for: .milliseconds(40))
+                }
+            } catch {
+                return
+            }
+            guard !Task.isCancelled else { return }
+            self.bellRotation = 0
+            self.bellAnimationTask = nil
             self.updateStatusItem()
         }
     }

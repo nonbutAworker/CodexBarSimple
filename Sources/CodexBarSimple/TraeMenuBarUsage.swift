@@ -6,19 +6,22 @@ struct TraeMenuBarUsage: View {
     let isLunaReserve: Bool
     let resetEmphasis: CGFloat
     let isResetScheduled: Bool
+    let bellRotation: Double
 
     init(
         value: String,
         remainingPercent: Double?,
         isLunaReserve: Bool = false,
         resetEmphasis: CGFloat = 0,
-        isResetScheduled: Bool = false
+        isResetScheduled: Bool = false,
+        bellRotation: Double = 0
     ) {
         self.value = value
         self.remainingPercent = remainingPercent
         self.isLunaReserve = isLunaReserve
         self.resetEmphasis = resetEmphasis
         self.isResetScheduled = isResetScheduled
+        self.bellRotation = bellRotation
     }
 
     var body: some View {
@@ -39,11 +42,13 @@ struct TraeMenuBarUsage: View {
 
             Spacer(minLength: 1)
 
-            Text(self.isLunaReserve ? "Luna left" : "Codex left")
-                .font(TraeTheme.Typography.menuLabel)
-                .foregroundStyle(TraeTheme.Palette.text)
-                .lineLimit(1)
-                .fixedSize(horizontal: true, vertical: false)
+            if self.isResetScheduled {
+                TraeBell()
+                    .stroke(TraeTheme.Palette.statusWarning, lineWidth: 1)
+                    .frame(width: 11, height: 11)
+                    .rotationEffect(.degrees(self.bellRotation), anchor: .top)
+                    .frame(width: 18, height: 16)
+            }
 
             GeometryReader { geometry in
                 ZStack(alignment: .bottom) {

@@ -1,4 +1,4 @@
-CodexBarSimple 1.2.0 (Apple Silicon)
+CodexBarSimple 1.3.0 (Apple Silicon)
 
 Recommended installation:
 1. Open Terminal.
@@ -22,6 +22,8 @@ Controls:
 - Left click does nothing.
 - Right click opens a menu containing only Quit.
 - Usage refreshes at launch and once every minute.
+- The percentage has no text label. A small bell appears only for a confirmed upcoming reset; it swings for
+  one minute per new announcement, then stays still until the announcement ends.
 - Reset announcements are checked at launch and every 10 minutes. An orange border means a regular reset is
   explicitly announced and awaiting execution. Forecasts and banked reset credits do not trigger the border.
 - When the normal Codex quota is exhausted, Luna Reserve appears with a moon icon and gold usage bar.

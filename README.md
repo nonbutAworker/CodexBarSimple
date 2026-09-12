@@ -37,10 +37,12 @@ mount it, and run this command in Terminal:
 
 ## Features
 
-- Keeps the remaining Codex percentage, `Codex left` label, and a vertical usage bar permanently visible.
+- Keeps the remaining Codex percentage and a vertical usage bar permanently visible, with no text labels.
 - Refreshes immediately at launch and then once every minute.
 - Checks [Codex Resets](https://codex-resets.com/api/docs) at launch and every 10 minutes. An orange border means
   a regular quota reset has been explicitly announced and is awaiting execution: use your remaining quota soon.
+- Shows a small TRAE bell beside the percentage for a confirmed upcoming reset. It swings for the first minute,
+  then stays still until the announcement ends. Repeated checks of the same announcement do not restart it.
 - When the normal Codex quota is exhausted, switches to Luna Reserve with a moon icon, gold percentage, and usage bar; normal quota remains the priority whenever it is above `0%`.
 - Turns both the number and usage bar red below `10%` remaining.
 - When an observed quota jumps from below `100%` back to `100%`, briefly enlarges the number and turns it green.
@@ -50,6 +52,10 @@ mount it, and run this command in Terminal:
 Quota-reset animation at its peak:
 
 ![Quota reset animation peak](Validation/reset-animation-peak.png)
+
+Upcoming-reset bell (looped preview; the app stops swinging after one minute):
+
+![Upcoming-reset bell](Validation/reset-bell.gif)
 
 ## How it works and privacy
 

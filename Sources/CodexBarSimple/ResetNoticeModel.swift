@@ -20,10 +20,12 @@ struct CodexResetStatus: Decodable {
     struct ScheduledReset: Decodable {
         let status: String
         let resetType: String
+        let id: String
 
         private enum CodingKeys: String, CodingKey {
             case status
             case resetType = "reset_type"
+            case id
         }
     }
 }
@@ -35,6 +37,8 @@ final class ResetNoticeModel {
 
     @ObservationIgnored private let session: URLSession
     @ObservationIgnored private let refreshInterval: Duration
+    private(set) var bellEventID = 0
+    @ObservationIgnored private var lastAnnouncedResetID: String?
 
     init(
         session: URLSession = URLSession(configuration: .ephemeral),
@@ -69,6 +73,12 @@ final class ResetNoticeModel {
             }
             let status = try JSONDecoder().decode(CodexResetStatus.self, from: data)
             self.isResetScheduled = status.isResetScheduled
+            if status.isResetScheduled, let id = status.data.scheduledReset?.id,
+                id != self.lastAnnouncedResetID
+            {
+                self.lastAnnouncedResetID = id
+                self.bellEventID += 1
+            }
         } catch {
             // An unavailable feed cannot confirm that a reset is still pending.
             self.isResetScheduled = false

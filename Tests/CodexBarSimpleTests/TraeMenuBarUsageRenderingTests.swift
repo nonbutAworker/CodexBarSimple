@@ -1,7 +1,9 @@
 import AppKit
 import Foundation
+import ImageIO
 import SwiftUI
 import Testing
+import UniformTypeIdentifiers
 
 @testable import CodexBarSimple
 
@@ -13,8 +15,8 @@ struct TraeMenuBarUsageRenderingTests {
 
         let renderer = ImageRenderer(
             content: TraeMenuBarUsage(
-                value: "6%",
-                remainingPercent: 6
+                value: "96%",
+                remainingPercent: 96
             )
             .fixedSize())
         renderer.scale = 2
@@ -69,6 +71,10 @@ struct TraeMenuBarUsageRenderingTests {
             noticeRenderer.scale = 3
             try Self.writePNG(try #require(noticeRenderer.nsImage), to: outputPath)
         }
+
+        if let outputPath = ProcessInfo.processInfo.environment["CODEXBAR_SIMPLE_BELL_QA_GIF_PATH"] {
+            try Self.writeBellGIF(to: outputPath)
+        }
     }
 
     @Test
@@ -98,5 +104,29 @@ struct TraeMenuBarUsageRenderingTests {
         let bitmap = try #require(NSBitmapImageRep(data: tiffData))
         let pngData = try #require(bitmap.representation(using: .png, properties: [:]))
         try pngData.write(to: URL(fileURLWithPath: outputPath), options: .atomic)
+    }
+
+    private static func writeBellGIF(to outputPath: String) throws {
+        let destination = try #require(
+            CGImageDestinationCreateWithURL(
+                URL(fileURLWithPath: outputPath) as CFURL, UTType.gif.identifier as CFString, 20, nil))
+        CGImageDestinationSetProperties(
+            destination, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: 0]] as CFDictionary)
+        let start = CFAbsoluteTimeGetCurrent()
+        for frame in 0..<20 {
+            let renderer = ImageRenderer(
+                content: TraeMenuBarUsage(
+                    value: "96%", remainingPercent: 96, isResetScheduled: true,
+                    bellRotation: ResetBellMotion.rotation(at: 0.8 + Double(frame) * 0.04)
+                )
+                .padding(8)
+                .fixedSize())
+            renderer.scale = 3
+            CGImageDestinationAddImage(
+                destination, try #require(renderer.cgImage),
+                [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: 0.04]] as CFDictionary)
+        }
+        #expect(CGImageDestinationFinalize(destination))
+        print("BELL_QA_FRAME_MEAN_MS=\((CFAbsoluteTimeGetCurrent() - start) * 1000 / 20)")
     }
 }

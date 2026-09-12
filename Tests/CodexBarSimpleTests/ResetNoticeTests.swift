@@ -6,14 +6,17 @@ import Testing
 @MainActor
 struct ResetNoticeTests {
     @Test(arguments: [
-        (#"{"scheduled_reset":{"status":"scheduled","reset_type":"regular","scheduled_for":null}}"#, true),
         (
-            #"{"scheduled_reset":{"status":"scheduled","reset_type":"regular","scheduled_for":"2020-01-01T00:00:00Z"}}"#,
+            #"{"scheduled_reset":{"id":"reset-1","status":"scheduled","reset_type":"regular","scheduled_for":null}}"#,
             true
         ),
-        (#"{"scheduled_reset":{"status":"scheduled","reset_type":"banked"}}"#, false),
-        (#"{"scheduled_reset":{"status":"completed","reset_type":"regular"}}"#, false),
-        (#"{"scheduled_reset":{"status":"scheduled","reset_type":"unknown"}}"#, false),
+        (
+            #"{"scheduled_reset":{"id":"reset-1","status":"scheduled","reset_type":"regular","scheduled_for":"2020-01-01T00:00:00Z"}}"#,
+            true
+        ),
+        (#"{"scheduled_reset":{"id":"reset-1","status":"scheduled","reset_type":"banked"}}"#, false),
+        (#"{"scheduled_reset":{"id":"reset-1","status":"completed","reset_type":"regular"}}"#, false),
+        (#"{"scheduled_reset":{"id":"reset-1","status":"scheduled","reset_type":"unknown"}}"#, false),
         (#"{"scheduled_reset":null,"active_watch":{"level":"strong","reset_chance_percent":100}}"#, false),
         (#"{"scheduled_reset":null,"latest_reset":{"reset_type":"regular"}}"#, false),
         (#"{"scheduled_reset":null}"#, false),
@@ -43,6 +46,32 @@ struct ResetNoticeTests {
         for expected in [true, false, true, false, true] {
             await model.refresh()
             #expect(model.isResetScheduled == expected)
+        }
+    }
+
+    @Test
+    func `rings once per new announcement despite repeated checks and temporary failures`() async {
+        let session = Self.session(
+            scenario: "scheduled,scheduled,offline,scheduled,clear,scheduled,scheduled-new,scheduled-new")
+        defer { session.invalidateAndCancel() }
+        let model = ResetNoticeModel(session: session)
+        #expect(model.bellEventID == 0)
+
+        for expectedEventID in [1, 1, 1, 1, 1, 1, 2, 2] {
+            await model.refresh()
+            #expect(model.bellEventID == expectedEventID)
+        }
+    }
+
+    @Test
+    func `bell swings both ways for one minute then rests`() {
+        #expect(ResetBellMotion.duration == 60)
+        #expect(abs(ResetBellMotion.rotation(at: 0.2) - 18) < 0.001)
+        #expect(abs(ResetBellMotion.rotation(at: 0.6) + 18) < 0.001)
+        #expect(abs(ResetBellMotion.rotation(at: 59.8) + 18) < 0.001)
+        #expect(abs(ResetBellMotion.rotation(at: 59.9)) < 18)
+        for elapsed: TimeInterval in [-1, 0, 60, 61, 600] {
+            #expect(ResetBellMotion.rotation(at: elapsed) == 0)
         }
     }
 
@@ -114,8 +143,10 @@ private final class ResetStatusURLProtocol: URLProtocol, @unchecked Sendable {
             body = #"{"data":{"scheduled_reset":null}}"#
         case "malformed":
             body = "invalid JSON"
+        case "scheduled-new":
+            body = #"{"data":{"scheduled_reset":{"id":"reset-2","status":"scheduled","reset_type":"regular"}}}"#
         default:
-            body = #"{"data":{"scheduled_reset":{"status":"scheduled","reset_type":"regular"}}}"#
+            body = #"{"data":{"scheduled_reset":{"id":"reset-1","status":"scheduled","reset_type":"regular"}}}"#
         }
         let response = HTTPURLResponse(
             url: self.request.url!,
