@@ -1,4 +1,4 @@
-CodexBarSimple 1.4.1 (Apple Silicon)
+CodexBarSimple 1.4.2 (Apple Silicon)
 
 Recommended installation:
 1. Open Terminal.

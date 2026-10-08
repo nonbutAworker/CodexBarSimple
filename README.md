@@ -72,6 +72,10 @@ CodexBarSimple follows the read-only Codex CLI approach used by
 4. Calculate the remaining percentage from `usedPercent`; when the normal window is exhausted, use the
    `base_model_inference` Luna Reserve window and render it in an `NSStatusItem`.
 
+CLI discovery supports standalone installations and the CLI bundled with current and legacy ChatGPT/Codex
+desktop apps, including when the login service has only the standard macOS `PATH`. Local macOS logs record
+usage refresh results and failures to help diagnose an unavailable display.
+
 The app does not read or modify `~/.codex/auth.json`, access the macOS Keychain, or send usage data to a third
 party. Authentication and token management remain entirely under the Codex CLI.
 

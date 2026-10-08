@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import Observation
 
 @MainActor
@@ -16,6 +17,7 @@ final class UsageModel {
     @ObservationIgnored private let client: CodexUsageClient
     @ObservationIgnored private let refreshInterval: Duration
     @ObservationIgnored private var isRefreshing = false
+    @ObservationIgnored private let logger = Logger(subsystem: "app.codexbarsimple.CodexBarSimple", category: "Usage")
 
     init(
         client: CodexUsageClient = CodexUsageClient(),
@@ -60,10 +62,12 @@ final class UsageModel {
             self.displayText = text
             self.remainingPercent = displayedUsage.window.remainingPercent
             self.displayKind = displayedUsage.kind
+            self.logger.info("Usage refreshed: \(text, privacy: .public)")
             if didReset {
                 self.resetEventID += 1
             }
         } catch {
+            self.logger.error("Usage refresh failed: \(error.localizedDescription, privacy: .public)")
             if self.remainingPercent == nil {
                 self.displayText = "--%"
             }

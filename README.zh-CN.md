@@ -71,6 +71,9 @@ CodexBarSimple 沿用 [CodexBar](https://github.com/steipete/CodexBar) 的只读
 应用不会读取或修改 `~/.codex/auth.json`，不会访问 macOS 钥匙串，也不会把用量数据发送给第三方。
 Codex 的登录和令牌生命周期仍完全由 Codex CLI 管理。
 
+CLI 查找支持独立安装及新旧 ChatGPT/Codex 桌面端的内置 CLI，即使登录服务只有 macOS 默认的
+`PATH` 也可以找到。用量刷新结果和失败原因会记录在本机 macOS 日志中，便于诊断无法显示数据的问题。
+
 重置提醒独立读取公开接口 `https://codex-resets.com/api/v1/status`，不携带 Cookie、账号资料或用量数据。
 只在 `scheduled_reset` 的 `status` 为 `scheduled` 且 `reset_type` 为 `regular` 时显示橙框；概率预测
 （`active_watch`）、已完成的重置和发放 banked reset 券不会触发。预计执行时间已过不代表重置完成，

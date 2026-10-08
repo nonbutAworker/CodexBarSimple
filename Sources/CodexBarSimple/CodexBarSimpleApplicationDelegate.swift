@@ -1,4 +1,5 @@
 import AppKit
+import OSLog
 import Observation
 import SwiftUI
 import UserNotifications
@@ -21,6 +22,7 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate, 
     private var notificationAuthorizationTask: Task<Void, Never>?
     private var resetNotificationTask: Task<Void, Never>?
     private var notificationAnnouncementID: String?
+    private let logger = Logger(subsystem: "app.codexbarsimple.CodexBarSimple", category: "MenuBar")
 
     func applicationDidFinishLaunching(_: Notification) {
         self.installStatusItem()
@@ -108,7 +110,11 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate, 
         image.isTemplate = false
         button.image = image
         button.setAccessibilityLabel(self.model.accessibilityLabel)
+        let previousValue = button.accessibilityValue() as? String
         button.setAccessibilityValue(self.model.displayText)
+        if previousValue != self.model.displayText {
+            self.logger.info("Menu bar rendered: \(self.model.displayText, privacy: .public)")
+        }
         button.setAccessibilityHelp(
             self.resetNotice.isResetScheduled
                 ? "A Codex quota reset is announced and awaiting execution. Orange border: use your remaining quota soon."
