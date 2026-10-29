@@ -127,14 +127,18 @@ struct TraeMenuBarUsageRenderingTests {
 
             let clock = ContinuousClock()
             let deadline = clock.now.advanced(by: .seconds(1))
-            while host.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) != appearanceName,
+            let expectedScheme: ColorScheme = appearanceName == .darkAqua ? .dark : .light
+            while host.rootView.systemColorScheme != expectedScheme,
                 clock.now < deadline
             {
                 try await Task.sleep(for: .milliseconds(5))
             }
 
             #expect(host.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == appearanceName)
-            #expect(host.rootView.value == "33%")
+            #expect(host.rootView.systemColorScheme == expectedScheme)
+            host.updateContent(TraeMenuBarUsage(value: "27%", remainingPercent: 27))
+            #expect(host.rootView.systemColorScheme == expectedScheme)
+            #expect(host.rootView.value == "27%")
             #expect(host.hitTest(NSPoint(x: 40, y: 11)) == nil)
         }
     }

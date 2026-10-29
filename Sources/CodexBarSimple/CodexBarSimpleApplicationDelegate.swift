@@ -103,7 +103,7 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate, 
             isResetScheduled: self.resetNotice.isResetScheduled,
             bellRotation: self.bellRotation)
         if let usageView = self.usageView {
-            usageView.rootView = content
+            usageView.updateContent(content)
         } else {
             let usageView = MenuBarHostingView(rootView: content)
             usageView.sizingOptions = []

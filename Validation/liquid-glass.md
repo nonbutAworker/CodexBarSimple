@@ -14,6 +14,9 @@ Validated on an Apple Silicon Mac running macOS 26.5.1.
 - Bind the hosting view to the application's effective appearance and observe changes, rather than
   inheriting the status button's potentially wallpaper-dependent appearance. Both modes retain the
   same regular frosted glass; changing the system theme does not require restarting or refreshing usage.
+- Pass that appearance explicitly into SwiftUI's `colorScheme` environment as well as AppKit.
+  Updating only `NSView.appearance` left the real menu bar light after a system Dark switch.
+  Preserve the injected scheme when quota updates or animations replace the root view's content.
 - Preserve the 80 × 22 pt card, 84 pt status item, font sizes, refresh intervals, and right-click-only
   Quit action. The hosting view passes mouse events through to the existing status button.
 
@@ -21,7 +24,8 @@ Validated on an Apple Silicon Mac running macOS 26.5.1.
 
 - `swift test --filter TraeMenuBarUsageRenderingTests`: all 6 focused tests passed, including a live-host
   light → dark → light regression with the parent set to the opposite appearance. Only the test process's
-  appearance is changed; no system settings are modified.
+  appearance is changed; no system settings are modified. The regression checks the injected SwiftUI
+  scheme too, and verifies it survives a subsequent quota refresh.
 - `make check`: formatting, build, and all 39 tests in 9 suites passed. Live-account tests were not enabled.
 - `./Scripts/package_app.sh`: release build and ad-hoc signing passed.
 - A native QA window using the actual component verified normal, low-quota, reserve, upcoming-reset,
@@ -29,6 +33,10 @@ Validated on an Apple Silicon Mac running macOS 26.5.1.
   QA window, not an offscreen rendering or a capture of the system menu bar.
 - Replaced the installed per-user app with the built bundle and restarted its existing LaunchAgent.
   No Codex account configuration or login data was modified.
+- With macOS already in Dark mode, native logs confirmed `NSAppearanceNameDarkAqua`; the user then
+  confirmed the actual menu bar changed to dark frosted glass with a white percentage. This confirms
+  the production display, not just the AppKit appearance property. Offscreen `ImageRenderer` output
+  does not capture native Liquid Glass reliably and is not used as visual proof of this behavior.
 
 ![Native Liquid Glass state verification](liquid-glass-states.png)
 

@@ -7,6 +7,8 @@ struct TraeMenuBarUsage: View {
     let resetEmphasis: CGFloat
     let isResetScheduled: Bool
     let bellRotation: Double
+    var systemColorScheme: ColorScheme?
+    @Environment(\.colorScheme) private var inheritedColorScheme
 
     init(
         value: String,
@@ -14,7 +16,8 @@ struct TraeMenuBarUsage: View {
         isLunaReserve: Bool = false,
         resetEmphasis: CGFloat = 0,
         isResetScheduled: Bool = false,
-        bellRotation: Double = 0
+        bellRotation: Double = 0,
+        systemColorScheme: ColorScheme? = nil
     ) {
         self.value = value
         self.remainingPercent = remainingPercent
@@ -22,6 +25,7 @@ struct TraeMenuBarUsage: View {
         self.resetEmphasis = resetEmphasis
         self.isResetScheduled = isResetScheduled
         self.bellRotation = bellRotation
+        self.systemColorScheme = systemColorScheme
     }
 
     var body: some View {
@@ -40,6 +44,7 @@ struct TraeMenuBarUsage: View {
                     .strokeBorder(TraeTheme.Palette.statusWarning, lineWidth: 1.5)
             }
         }
+        .environment(\.colorScheme, self.systemColorScheme ?? self.inheritedColorScheme)
     }
 
     private var content: some View {
