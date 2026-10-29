@@ -23,7 +23,11 @@ final class MenuBarHostingView: NSHostingView<TraeMenuBarUsage> {
         let appearance = NSApplication.shared.effectiveAppearance
         let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
         self.appearance = appearance
-        self.rootView.systemColorScheme = isDark ? .dark : .light
+        var content = self.rootView
+        content.systemColorScheme = isDark ? .dark : .light
+        self.rootView = content
+        self.needsLayout = true
+        self.needsDisplay = true
         self.logger.info("Menu bar appearance: \(appearance.name.rawValue, privacy: .public), dark: \(isDark)")
     }
 

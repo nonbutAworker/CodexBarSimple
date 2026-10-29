@@ -44,6 +44,8 @@ struct TraeMenuBarUsage: View {
                     .strokeBorder(TraeTheme.Palette.statusWarning, lineWidth: 1.5)
             }
         }
+        // Native menu-bar glass can retain its old material after a live appearance change.
+        .id(self.systemColorScheme ?? self.inheritedColorScheme)
         .environment(\.colorScheme, self.systemColorScheme ?? self.inheritedColorScheme)
     }
 

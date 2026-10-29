@@ -17,6 +17,10 @@ Validated on an Apple Silicon Mac running macOS 26.5.1.
 - Pass that appearance explicitly into SwiftUI's `colorScheme` environment as well as AppKit.
   Updating only `NSView.appearance` left the real menu bar light after a system Dark switch.
   Preserve the injected scheme when quota updates or animations replace the root view's content.
+- Give the native glass subtree an appearance-keyed identity so live light/dark changes recreate its
+  material instead of retaining the previous rendering. Assign the updated root view explicitly and
+  request layout and display invalidation. Quota refreshes keep the same identity, so this does not
+  recreate glass every minute or add a polling timer.
 - Preserve the 80 × 22 pt card, 84 pt status item, font sizes, refresh intervals, and right-click-only
   Quit action. The hosting view passes mouse events through to the existing status button.
 - Give the percentage a glass-inspired typography treatment: a translucent directional gradient and
@@ -41,6 +45,14 @@ Validated on an Apple Silicon Mac running macOS 26.5.1.
   confirmed the actual menu bar changed to dark frosted glass with a white percentage. This confirms
   the production display, not just the AppKit appearance property. Offscreen `ImageRenderer` output
   does not capture native Liquid Glass reliably and is not used as visual proof of this behavior.
+- For the later live-switch report, reproduced changes through macOS System Settings, not by restarting
+  the app. After installing the redraw fix, the same app process received light → dark → light → dark
+  during two consecutive switching rounds; System Settings was left on Dark. Event delivery and the
+  unchanged process were verified through native logs. These logs alone are not proof of the final
+  menu-bar appearance; a visual confirmation was requested separately.
+- One check run during system theme switching hit the pre-existing 5-second refresh-loop test deadline.
+  The focused `UsageModelTests` rerun and the subsequent complete `make check` both passed without
+  changing unrelated refresh code or weakening the test.
 
 ![Native Liquid Glass state verification](liquid-glass-states.png)
 
