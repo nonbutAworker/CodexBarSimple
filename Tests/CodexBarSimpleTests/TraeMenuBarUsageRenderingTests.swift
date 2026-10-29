@@ -157,6 +157,54 @@ struct TraeMenuBarUsageRenderingTests {
         #expect(emphasized.isResetEmphasized)
     }
 
+    @Test(arguments: [ColorScheme.light, .dark])
+    func `renders glass inspired digits without changing their font or layout`(colorScheme: ColorScheme) throws {
+        TraeFontRegistrar.register()
+        let states = [
+            TraeMenuBarUsage(value: "27%", remainingPercent: 27),
+            TraeMenuBarUsage(value: "6%", remainingPercent: 6),
+            TraeMenuBarUsage(value: "95%", remainingPercent: 95, isLunaReserve: true),
+            TraeMenuBarUsage(value: "100%", remainingPercent: 100, resetEmphasis: 1),
+        ]
+
+        for state in states {
+            let renderer = ImageRenderer(content: state.metricLabel.environment(\.colorScheme, colorScheme))
+            let image = try #require(renderer.nsImage)
+            let pixels = try #require(renderer.cgImage?.dataProvider?.data) as Data
+
+            #expect(image.size.width > 0 && image.size.width < 42)
+            #expect(image.size.height > 0 && image.size.height <= 22)
+            #expect(pixels.contains { $0 != 0 })
+        }
+
+        if colorScheme == .dark,
+            let outputPath = ProcessInfo.processInfo.environment["CODEXBAR_SIMPLE_GLASS_TEXT_QA_SNAPSHOT_PATH"]
+        {
+            let renderer = ImageRenderer(
+                content: HStack(spacing: 24) {
+                    VStack(alignment: .leading, spacing: 16) {
+                        ForEach(states.indices, id: \.self) { index in
+                            states[index].metricLabel
+                        }
+                    }
+                    .padding(20)
+                    .background(.white)
+                    .environment(\.colorScheme, .light)
+                    VStack(alignment: .leading, spacing: 16) {
+                        ForEach(states.indices, id: \.self) { index in
+                            states[index].metricLabel
+                        }
+                    }
+                    .padding(20)
+                    .background(TraeTheme.Palette.surface)
+                    .environment(\.colorScheme, .dark)
+                }
+                .padding(12))
+            renderer.scale = 3
+            try Self.writePNG(try #require(renderer.nsImage), to: outputPath)
+        }
+    }
+
     private static func writePNG(_ image: NSImage, to outputPath: String) throws {
         let tiffData = try #require(image.tiffRepresentation)
         let bitmap = try #require(NSBitmapImageRep(data: tiffData))

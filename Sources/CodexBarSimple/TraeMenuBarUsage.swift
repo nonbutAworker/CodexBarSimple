@@ -56,12 +56,7 @@ struct TraeMenuBarUsage: View {
                     .frame(width: 8)
             }
 
-            Text(self.value)
-                .font(TraeTheme.Typography.menuMetric(size: self.metricFontSize))
-                .foregroundStyle(self.metricColor)
-                .monospacedDigit()
-                .lineLimit(1)
-                .fixedSize(horizontal: true, vertical: false)
+            self.metricLabel
 
             Spacer(minLength: 1)
 
@@ -89,6 +84,28 @@ struct TraeMenuBarUsage: View {
         }
         .padding(.horizontal, TraeTheme.Spacing.compact)
         .frame(width: 80, height: 22)
+    }
+
+    var metricLabel: some View {
+        Text(self.value)
+            .font(TraeTheme.Typography.menuMetric(size: self.metricFontSize))
+            .foregroundStyle(
+                LinearGradient(
+                    stops: [
+                        .init(color: self.metricColor, location: 0),
+                        .init(color: self.metricColor.opacity(0.94), location: 0.36),
+                        .init(color: self.metricColor.opacity(0.56), location: 0.52),
+                        .init(color: self.metricColor.opacity(0.92), location: 0.66),
+                        .init(color: self.metricColor.opacity(0.82), location: 1),
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing)
+            )
+            .shadow(color: .white.opacity(0.20), radius: 0, x: 0, y: -0.3)
+            .shadow(color: .black.opacity(0.20), radius: 0.4, x: 0, y: 0.4)
+            .monospacedDigit()
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
     }
 
     private var progress: CGFloat {

@@ -41,6 +41,8 @@ mount it, and run this command in Terminal:
 - Uses native, frosted Liquid Glass on macOS 26+, with a system translucent material on earlier versions.
   Both light and dark styles follow the system appearance automatically, including changes while the app is
   running, instead of inheriting a wallpaper-dependent menu bar style or drawing an opaque black card.
+- Gives the percentage a glass-inspired gradient and subtle edge highlights, keeping its original font size
+  and semantic red, gold, and green tones. This is a typography treatment, not a second native glass surface.
 - Refreshes immediately at launch and then once every minute.
 - Checks [Codex Resets](https://codex-resets.com/api/docs) at launch and every 10 minutes. An orange border means
   a regular quota reset has been explicitly announced and is awaiting execution: use your remaining quota soon.
