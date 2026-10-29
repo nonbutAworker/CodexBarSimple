@@ -109,6 +109,7 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate, 
             usageView.sizingOptions = []
             usageView.translatesAutoresizingMaskIntoConstraints = false
             button.addSubview(usageView)
+            usageView.followSystemAppearance()
             NSLayoutConstraint.activate([
                 usageView.centerXAnchor.constraint(equalTo: button.centerXAnchor),
                 usageView.centerYAnchor.constraint(equalTo: button.centerYAnchor),

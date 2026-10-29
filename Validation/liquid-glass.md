@@ -11,13 +11,18 @@ Validated on an Apple Silicon Mac running macOS 26.5.1.
   an `ImageRenderer` image. Reuse that host for quota changes and existing animations.
 - Let normal text and the empty progress track follow the system appearance. Keep the existing
   accent, low-quota red, Luna Reserve gold, orange reminder border, and bell.
+- Bind the hosting view to the application's effective appearance and observe changes, rather than
+  inheriting the status button's potentially wallpaper-dependent appearance. Both modes retain the
+  same regular frosted glass; changing the system theme does not require restarting or refreshing usage.
 - Preserve the 80 × 22 pt card, 84 pt status item, font sizes, refresh intervals, and right-click-only
   Quit action. The hosting view passes mouse events through to the existing status button.
 
 ## Verification
 
-- `swift test --filter TraeMenuBarUsageRenderingTests`: all 5 focused tests passed.
-- `make check`: formatting, build, and all 38 tests in 9 suites passed. Live-account tests were not enabled.
+- `swift test --filter TraeMenuBarUsageRenderingTests`: all 6 focused tests passed, including a live-host
+  light → dark → light regression with the parent set to the opposite appearance. Only the test process's
+  appearance is changed; no system settings are modified.
+- `make check`: formatting, build, and all 39 tests in 9 suites passed. Live-account tests were not enabled.
 - `./Scripts/package_app.sh`: release build and ad-hoc signing passed.
 - A native QA window using the actual component verified normal, low-quota, reserve, upcoming-reset,
   reset-emphasis, and loading states in light and dark appearances. The screenshot below is of that

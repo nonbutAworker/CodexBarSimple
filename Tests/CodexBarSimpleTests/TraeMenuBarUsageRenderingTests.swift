@@ -111,6 +111,35 @@ struct TraeMenuBarUsageRenderingTests {
     }
 
     @Test
+    func `follows system appearance changes instead of its menu bar parent`() async throws {
+        let application = NSApplication.shared
+        let originalAppearance = application.appearance
+        defer { application.appearance = originalAppearance }
+
+        let parent = NSView()
+        let host = MenuBarHostingView(rootView: TraeMenuBarUsage(value: "33%", remainingPercent: 33))
+        parent.addSubview(host)
+        host.followSystemAppearance()
+
+        for appearanceName in [NSAppearance.Name.aqua, .darkAqua, .aqua] {
+            parent.appearance = NSAppearance(named: appearanceName == .aqua ? .darkAqua : .aqua)
+            application.appearance = NSAppearance(named: appearanceName)
+
+            let clock = ContinuousClock()
+            let deadline = clock.now.advanced(by: .seconds(1))
+            while host.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) != appearanceName,
+                clock.now < deadline
+            {
+                try await Task.sleep(for: .milliseconds(5))
+            }
+
+            #expect(host.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == appearanceName)
+            #expect(host.rootView.value == "33%")
+            #expect(host.hitTest(NSPoint(x: 40, y: 11)) == nil)
+        }
+    }
+
+    @Test
     func `uses the largest fitting metric during reset emphasis`() {
         let normal = TraeMenuBarUsage(value: "100%", remainingPercent: 100)
         let emphasized = TraeMenuBarUsage(
