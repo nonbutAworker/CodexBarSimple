@@ -25,6 +25,24 @@ struct TraeMenuBarUsage: View {
     }
 
     var body: some View {
+        Group {
+            if #available(macOS 26, *) {
+                self.content
+                    .glassEffect(.regular, in: .rect(cornerRadius: TraeTheme.Radius.medium))
+            } else {
+                self.content
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: TraeTheme.Radius.medium))
+            }
+        }
+        .overlay {
+            if self.isResetScheduled {
+                RoundedRectangle(cornerRadius: TraeTheme.Radius.medium)
+                    .strokeBorder(TraeTheme.Palette.statusWarning, lineWidth: 1.5)
+            }
+        }
+    }
+
+    private var content: some View {
         HStack(spacing: 1.5) {
             if self.isLunaReserve {
                 Image(systemName: "moon.fill")
@@ -53,7 +71,7 @@ struct TraeMenuBarUsage: View {
             GeometryReader { geometry in
                 ZStack(alignment: .bottom) {
                     Capsule()
-                        .fill(TraeTheme.Palette.overlay3)
+                        .fill(.primary.opacity(0.12))
 
                     Capsule()
                         .fill(
@@ -66,15 +84,6 @@ struct TraeMenuBarUsage: View {
         }
         .padding(.horizontal, TraeTheme.Spacing.compact)
         .frame(width: 80, height: 22)
-        .background(TraeTheme.Palette.surface)
-        .clipShape(RoundedRectangle(cornerRadius: TraeTheme.Radius.medium))
-        .overlay {
-            RoundedRectangle(cornerRadius: TraeTheme.Radius.medium)
-                .strokeBorder(
-                    self.isResetScheduled ? TraeTheme.Palette.statusWarning : TraeTheme.Palette.border2,
-                    lineWidth: self.isResetScheduled ? 1.5 : 0.5)
-        }
-        .environment(\.colorScheme, .dark)
     }
 
     private var progress: CGFloat {
@@ -101,7 +110,7 @@ struct TraeMenuBarUsage: View {
         if self.isLunaReserve {
             return TraeTheme.Palette.reserveGold
         }
-        return TraeTheme.Palette.textHover
+        return .primary
     }
 
     private var progressColor: Color {
@@ -123,3 +132,19 @@ struct TraeMenuBarUsage: View {
         return normal + (maximum - normal) * emphasis
     }
 }
+
+#if DEBUG
+    #Preview("Liquid Glass states") {
+        VStack(spacing: 12) {
+            TraeMenuBarUsage(value: "33%", remainingPercent: 33)
+            TraeMenuBarUsage(value: "6%", remainingPercent: 6)
+            TraeMenuBarUsage(value: "95%", remainingPercent: 95, isLunaReserve: true)
+            TraeMenuBarUsage(value: "33%", remainingPercent: 33, isResetScheduled: true)
+            TraeMenuBarUsage(value: "100%", remainingPercent: 100, resetEmphasis: 1)
+            TraeMenuBarUsage(value: "--%", remainingPercent: nil)
+        }
+        .padding(24)
+        .background(
+            LinearGradient(colors: [.blue.opacity(0.2), .mint.opacity(0.3)], startPoint: .top, endPoint: .bottom))
+    }
+#endif

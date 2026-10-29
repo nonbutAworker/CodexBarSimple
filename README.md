@@ -5,7 +5,7 @@
 A tiny macOS menu bar utility that keeps your remaining Codex usage visible at a glance. No window to open,
 no dashboard to check—just the percentage in the menu bar.
 
-![CodexBarSimple menu bar](Validation/persistent-menu-card.png)
+![Liquid Glass states in light and dark appearances](Validation/liquid-glass-states.png)
 
 ## One-command install
 
@@ -38,6 +38,8 @@ mount it, and run this command in Terminal:
 ## Features
 
 - Keeps the remaining Codex percentage and a vertical usage bar permanently visible, with no text labels.
+- Uses native, frosted Liquid Glass on macOS 26+, with a system translucent material on earlier versions.
+  The live view follows the menu bar's appearance instead of drawing an opaque black card.
 - Refreshes immediately at launch and then once every minute.
 - Checks [Codex Resets](https://codex-resets.com/api/docs) at launch and every 10 minutes. An orange border means
   a regular quota reset has been explicitly announced and is awaiting execution: use your remaining quota soon.
@@ -52,14 +54,6 @@ mount it, and run this command in Terminal:
 - When an observed quota jumps from below `100%` back to `100%`, briefly enlarges the number and turns it green.
 - Ignores left clicks; the right-click menu contains only `Quit`.
 - Has no Dock icon, settings window, account manager, analytics, or telemetry.
-
-Quota-reset animation at its peak:
-
-![Quota reset animation peak](Validation/reset-animation-peak.png)
-
-Upcoming-reset bell (looped preview; the app stops swinging after one minute):
-
-![Upcoming-reset bell](Validation/reset-bell.gif)
 
 ## How it works and privacy
 

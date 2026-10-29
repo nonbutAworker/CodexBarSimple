@@ -86,6 +86,31 @@ struct TraeMenuBarUsageRenderingTests {
     }
 
     @Test
+    func `hosts live glass without intercepting status button clicks`() {
+        let host = MenuBarHostingView(rootView: TraeMenuBarUsage(value: "33%", remainingPercent: 33))
+        host.frame = NSRect(x: 0, y: 0, width: 80, height: 22)
+
+        #expect(!host.isOpaque)
+        #expect(host.hitTest(NSPoint(x: 40, y: 11)) == nil)
+
+        host.rootView = TraeMenuBarUsage(value: "6%", remainingPercent: 6, isResetScheduled: true)
+        #expect(host.rootView.value == "6%")
+        #expect(host.rootView.isLowRemaining)
+        #expect(host.rootView.isResetScheduled)
+        #expect(host.frame.size == NSSize(width: 80, height: 22))
+    }
+
+    @Test(arguments: [ColorScheme.light, .dark])
+    func `keeps the compact layout in both system appearances`(colorScheme: ColorScheme) throws {
+        let renderer = ImageRenderer(
+            content: TraeMenuBarUsage(value: "33%", remainingPercent: 33)
+                .environment(\.colorScheme, colorScheme))
+        let image = try #require(renderer.nsImage)
+
+        #expect(image.size == NSSize(width: 80, height: 22))
+    }
+
+    @Test
     func `uses the largest fitting metric during reset emphasis`() {
         let normal = TraeMenuBarUsage(value: "100%", remainingPercent: 100)
         let emphasized = TraeMenuBarUsage(

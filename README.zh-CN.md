@@ -4,7 +4,7 @@
 
 一个专注于 Codex 剩余额度的极简 macOS 菜单栏工具。无需打开窗口，抬眼就能看到百分比。
 
-![CodexBarSimple 菜单栏](Validation/persistent-menu-card.png)
+![浅色与深色外观下的 Liquid Glass 状态](Validation/liquid-glass-states.png)
 
 ## 一键安装
 
@@ -35,6 +35,7 @@ Developer ID 的发布者身份验证。
 ## 产品特性
 
 - 菜单栏永久显示 Codex 剩余百分比和竖向用量线，不显示文字标签；
+- macOS 26+ 使用雾面原生 Liquid Glass，旧版系统使用半透明材质；实时视图跟随菜单栏外观，不再绘制黑色实心底；
 - 启动后立即读取，随后每分钟自动刷新；
 - 启动时及每 10 分钟检查 [Codex Resets](https://codex-resets.com/api/docs)。已明确公告、等待执行的常规额度重置
   会让卡片显示一圈橙色边框，提醒尽快使用当前剩余额度；
@@ -49,14 +50,6 @@ Developer ID 的发布者身份验证。
 - 已观察到的额度从非 `100%` 回到 `100%` 时，数字短暂放大并变绿；
 - 左键点击没有任何反应，右键菜单只有 `Quit`；
 - 没有 Dock 图标、设置窗口、账号管理、分析或遥测。
-
-额度重置动画峰值：
-
-![额度重置动画峰值](Validation/reset-animation-peak.png)
-
-即将重置的铃铛（循环演示，应用中 1 分钟后停止摇晃）：
-
-![即将重置的铃铛](Validation/reset-bell.gif)
 
 ## 工作原理与隐私
 

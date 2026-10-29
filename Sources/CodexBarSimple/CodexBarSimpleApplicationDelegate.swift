@@ -23,6 +23,7 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate, 
     private var resetNotificationTask: Task<Void, Never>?
     private var notificationAnnouncementID: String?
     private let logger = Logger(subsystem: "app.codexbarsimple.CodexBarSimple", category: "MenuBar")
+    private var usageView: MenuBarHostingView?
 
     func applicationDidFinishLaunching(_: Notification) {
         self.installStatusItem()
@@ -55,8 +56,6 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate, 
         button.target = self
         button.action = #selector(self.handleStatusItemClick(_:))
         button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-        button.imagePosition = .imageOnly
-        button.imageScaling = .scaleNone
         button.setAccessibilityLabel(self.model.accessibilityLabel)
         self.statusItem = statusItem
 
@@ -96,19 +95,28 @@ final class CodexBarSimpleApplicationDelegate: NSObject, NSApplicationDelegate, 
     private func updateStatusItem() {
         guard let button = self.statusItem?.button else { return }
 
-        let renderer = ImageRenderer(
-            content: TraeMenuBarUsage(
-                value: self.model.displayText,
-                remainingPercent: self.model.remainingPercent,
-                isLunaReserve: self.model.displayKind?.isLunaReserve == true,
-                resetEmphasis: self.resetEmphasis,
-                isResetScheduled: self.resetNotice.isResetScheduled,
-                bellRotation: self.bellRotation))
-        renderer.scale = button.window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
-
-        guard let image = renderer.nsImage else { return }
-        image.isTemplate = false
-        button.image = image
+        let content = TraeMenuBarUsage(
+            value: self.model.displayText,
+            remainingPercent: self.model.remainingPercent,
+            isLunaReserve: self.model.displayKind?.isLunaReserve == true,
+            resetEmphasis: self.resetEmphasis,
+            isResetScheduled: self.resetNotice.isResetScheduled,
+            bellRotation: self.bellRotation)
+        if let usageView = self.usageView {
+            usageView.rootView = content
+        } else {
+            let usageView = MenuBarHostingView(rootView: content)
+            usageView.sizingOptions = []
+            usageView.translatesAutoresizingMaskIntoConstraints = false
+            button.addSubview(usageView)
+            NSLayoutConstraint.activate([
+                usageView.centerXAnchor.constraint(equalTo: button.centerXAnchor),
+                usageView.centerYAnchor.constraint(equalTo: button.centerYAnchor),
+                usageView.widthAnchor.constraint(equalToConstant: 80),
+                usageView.heightAnchor.constraint(equalToConstant: 22),
+            ])
+            self.usageView = usageView
+        }
         button.setAccessibilityLabel(self.model.accessibilityLabel)
         let previousValue = button.accessibilityValue() as? String
         button.setAccessibilityValue(self.model.displayText)
